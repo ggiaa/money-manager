@@ -17,7 +17,7 @@ export default function RootLayout({ children }) {
   const [modalOpen, setModalOpen] = useState(false);
 
   return (
-    <html lang="en" className='bg-red-400 max-h-screen m-0 p-0'>
+    <html lang="en">
       <body className={inter.className}>
           <div className="h-[90vh] p-2">{children}</div>
 

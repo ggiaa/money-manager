@@ -9,6 +9,7 @@ import {
   PiGridFour,
   PiCoins,
 } from "react-icons/pi";
+import Accounts from "../components/settings/Accounts";
 
 function page() {
   const [selectedSettingMenu, setSelectedSettingMenu] = useState(1);
@@ -19,9 +20,9 @@ function page() {
   };
 
   return (
-    <div className="bg-white h-full rounded grid grid-cols-4">
+    <div className="bg-slate-50 h-full rounded grid grid-cols-4">
       {/* SIDEBARD */}
-      <div class="w-full text-gray-900 bg-white border border-gray-200 rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+      <div className="w-full text-gray-900 bg-white border border-gray-200 rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white">
         <div className="flex flex-col pt-6">
           <div
             className={`setting-menu ${
@@ -73,7 +74,9 @@ function page() {
         </div>
       </div>
 
-      <div className="col-span-3">12</div>
+      <div className="col-span-3 py-4 px-6 bg-slate-200">
+        {selectedSettingMenu == 1 && <Accounts />}
+      </div>
     </div>
   );
 }

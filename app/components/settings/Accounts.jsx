@@ -3,7 +3,7 @@ import React, { useEffect, useState } from "react";
 import { PiCreditCard, PiGearSix } from "react-icons/pi";
 import { useStore } from "zustand";
 import { NumericFormat } from "react-number-format";
-import EditAccount from "./EditAccount";
+import AddEditAccount from "./AddEditAccount";
 import { PiPlusCircleBold } from "react-icons/pi";
 
 function Accounts() {
@@ -18,6 +18,11 @@ function Accounts() {
     setEditedAccount(account);
   };
 
+  const handleAdd = () => {
+    setEditedAccount(null);
+    setShowModal(true);
+  };
+
   useEffect(() => {
     boundedStore.getAccounts();
   }, []);
@@ -25,7 +30,10 @@ function Accounts() {
   return (
     <>
       <div className="mb-3 flex justify-end">
-        <button className="bg-sky-500 px-4 py-2 text-white rounded-lg flex items-center shadow-md hover:bg-sky-600 hover:scale-105 transition-all">
+        <button
+          onClick={handleAdd}
+          className="bg-sky-500 px-4 py-2 text-white rounded-lg flex items-center shadow-md hover:bg-sky-600 hover:scale-105 transition-all"
+        >
           <PiPlusCircleBold className="text-2xl mr-2" />
           Add Account
         </button>
@@ -62,7 +70,7 @@ function Accounts() {
           ))}
         {/* modal */}
         {showModal && (
-          <EditAccount setShowModal={setShowModal} account={editedAccount} />
+          <AddEditAccount setShowModal={setShowModal} account={editedAccount} />
         )}
       </div>
     </>

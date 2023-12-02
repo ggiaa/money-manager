@@ -1,4 +1,5 @@
 import {
+  addDoc,
   collection,
   doc,
   getDocs,
@@ -19,6 +20,18 @@ export const accountsSlice = (set, get) => ({
     }));
 
     set({ accounts: filteredData });
+  },
+  addAccount: async (params) => {
+    const newAccount = {
+      account_name: params.accountName,
+      account_balance: params.accountBalance,
+      created_at: new Date(),
+    };
+
+    const docRef = await addDoc(collection(db, "accounts"), newAccount);
+    set((state) => ({
+      accounts: [...state.accounts, { ...newAccount, id: docRef.id }],
+    }));
   },
   editAccount: async (params) => {
     await updateDoc(doc(db, "accounts", params.accountId), {

@@ -12,7 +12,7 @@ const schema = Yup.object().shape({
   ),
 });
 
-function EditAccount({ setShowModal, account }) {
+function AddEditAccount({ setShowModal, account = null }) {
   const formik = useFormik({
     initialValues: {
       account_name: account ? account.account_name : "",
@@ -20,12 +20,19 @@ function EditAccount({ setShowModal, account }) {
     },
     validationSchema: schema,
     onSubmit: (values) => {
-      const accountId = account.id;
       const accountName = values.account_name;
       const accountBalance = values.account_balance;
 
-      boundedStore.editAccount({ accountId, accountName, accountBalance });
-      setShowModal(false);
+      if (account) {
+        // case edit an account
+        const accountId = account.id;
+        boundedStore.editAccount({ accountId, accountName, accountBalance });
+        setShowModal(false);
+      } else {
+        // case add an account
+        boundedStore.addAccount({ accountName, accountBalance });
+        setShowModal(false);
+      }
     },
   });
 
@@ -96,4 +103,4 @@ function EditAccount({ setShowModal, account }) {
   );
 }
 
-export default EditAccount;
+export default AddEditAccount;

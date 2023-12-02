@@ -1,6 +1,7 @@
 import {
   addDoc,
   collection,
+  deleteDoc,
   doc,
   getDocs,
   orderBy,
@@ -47,6 +48,11 @@ export const accountsSlice = (set, get) => ({
       return account;
     });
 
+    set({ accounts: acc });
+  },
+  deleteAccount: async ({ accountId }) => {
+    await deleteDoc(doc(db, "accounts", accountId));
+    const acc = get().accounts.filter((account) => account.id !== accountId);
     set({ accounts: acc });
   },
 });

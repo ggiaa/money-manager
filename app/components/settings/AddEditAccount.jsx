@@ -4,6 +4,7 @@ import { NumericFormat } from "react-number-format";
 import { useStore } from "zustand";
 import * as Yup from "yup";
 import { useFormik } from "formik";
+import { PiTrashSimpleBold, PiTrashFill, PiTrashBold } from "react-icons/pi";
 
 const schema = Yup.object().shape({
   account_name: Yup.string().required("Account name cannot be left blank."),
@@ -47,12 +48,27 @@ function AddEditAccount({ setShowModal, account = null }) {
     setShowModal(false);
   };
 
+  const handleDelete = () => {
+    const accountId = account.id;
+    boundedStore.deleteAccount({ accountId });
+    setShowModal(false);
+  };
+
   return (
     <div
       onClick={(e) => handleClose(e)}
       className="w-screen h-screen absolute top-0 left-0 bg-slate-950 bg-opacity-60 flex justify-center items-center z-20"
     >
-      <div className="bg-white py-8 px-16 rounded-lg w-96">
+      <div className="bg-white py-8 px-16 rounded-lg w-96 relative">
+        {account && (
+          <div className="absolute top-0 right-0">
+            <PiTrashBold
+              onClick={handleDelete}
+              className="text-2xl mr-3 mt-3 text-red-500 cursor-pointer"
+            />
+          </div>
+        )}
+
         <p className="font-semibold mb-4 text-lg text-center">Edit Account</p>
 
         <form onSubmit={formik.handleSubmit}>

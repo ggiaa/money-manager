@@ -1,14 +1,22 @@
 import { useBoundedStore } from "@/app/store/boundedStore";
 import React, { useEffect, useState } from "react";
-import { PiCreditCard } from "react-icons/pi";
+import { PiCreditCard, PiGearSix } from "react-icons/pi";
 import { useStore } from "zustand";
 import { NumericFormat } from "react-number-format";
+import EditAccount from "./EditAccount";
 
 function Accounts() {
   const boundedStore = useStore(useBoundedStore);
   const accounts = useBoundedStore((state) => state.accounts);
+  const [showModal, setShowModal] = useState(false);
 
-  console.log(accounts);
+  const [editedAccount, setEditedAccount] = useState("");
+
+  const handleEdit = (account) => {
+    setShowModal(true);
+    setEditedAccount(account);
+  };
+
   useEffect(() => {
     boundedStore.getAccounts();
   }, []);
@@ -36,8 +44,18 @@ function Accounts() {
                 />
               </p>
             </div>
+            <div
+              className="ml-auto cursor-pointer"
+              onClick={() => handleEdit(account)}
+            >
+              <PiGearSix className="text-2xl" />
+            </div>
           </div>
         ))}
+      {/* modal */}
+      {showModal && (
+        <EditAccount setShowModal={setShowModal} account={editedAccount} />
+      )}
     </div>
   );
 }

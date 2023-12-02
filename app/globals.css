@@ -81,3 +81,7 @@ body {
 .setting-submenu {
   @apply px-10 py-2 mx-4 mb-2 rounded-lg flex items-center cursor-pointer;
 }
+
+.input-style {
+  @apply border border-slate-400 rounded p-2 focus:outline-none focus:outline focus:outline-2 focus:outline-offset-1 focus:outline-blue-500;
+}

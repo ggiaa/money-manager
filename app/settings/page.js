@@ -8,6 +8,7 @@ import {
   PiCaretUp,
   PiGridFour,
   PiCoins,
+  PiCirclesThreePlus,
 } from "react-icons/pi";
 import Accounts from "../components/settings/Accounts";
 
@@ -43,7 +44,7 @@ function page() {
             Theme
           </div>
           <div onClick={subMenuHandle} className="setting-menu">
-            <PiGridFour className="setting-icon" />
+            <PiCirclesThreePlus className="setting-icon" />
             Categories
             {subMenuActive ? (
               <PiCaretUp className="text-2xl ml-auto" />

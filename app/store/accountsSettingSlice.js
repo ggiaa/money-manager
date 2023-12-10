@@ -10,7 +10,7 @@ import {
 } from "firebase/firestore";
 import { db } from "../config/firebase";
 
-export const accountsSlice = (set, get) => ({
+export const accountsSettingSlice = (set, get) => ({
   accounts: [],
   getAccounts: async () => {
     const q = query(collection(db, "accounts"), orderBy("created_at"));

@@ -11,6 +11,8 @@ import {
   PiCirclesThreePlus,
 } from "react-icons/pi";
 import Accounts from "../components/settings/Accounts";
+import Income from "../components/settings/Income";
+import Expense from "../components/settings/Expense";
 
 function page() {
   const [selectedSettingMenu, setSelectedSettingMenu] = useState(1);
@@ -34,15 +36,6 @@ function page() {
             <PiWallet className="setting-icon" />
             Accounts
           </div>
-          <div
-            className={`setting-menu ${
-              selectedSettingMenu == 2 ? "setting-selected-menu" : ""
-            }`}
-            onClick={() => setSelectedSettingMenu(2)}
-          >
-            <PiPalette className="setting-icon" />
-            Theme
-          </div>
           <div onClick={subMenuHandle} className="setting-menu">
             <PiCirclesThreePlus className="setting-icon" />
             Categories
@@ -54,18 +47,18 @@ function page() {
           </div>
           <div className={`${subMenuActive ? "block" : "hidden"}`}>
             <div
-              onClick={() => setSelectedSettingMenu(3)}
+              onClick={() => setSelectedSettingMenu(2)}
               className={`setting-submenu ${
-                selectedSettingMenu == 3 ? "setting-selected-menu" : ""
+                selectedSettingMenu == 2 ? "setting-selected-menu" : ""
               }`}
             >
               <PiCoins className="setting-icon" />
               <div className="select-none">Income</div>
             </div>
             <div
-              onClick={() => setSelectedSettingMenu(4)}
+              onClick={() => setSelectedSettingMenu(3)}
               className={`setting-submenu ${
-                selectedSettingMenu == 4 ? "setting-selected-menu" : ""
+                selectedSettingMenu == 3 ? "setting-selected-menu" : ""
               }`}
             >
               <PiShoppingBag className="setting-icon" />
@@ -77,6 +70,8 @@ function page() {
 
       <div className="col-span-3 py-4 px-6 bg-slate-200">
         {selectedSettingMenu == 1 && <Accounts />}
+        {selectedSettingMenu == 2 && <Income />}
+        {selectedSettingMenu == 3 && <Expense />}
       </div>
     </div>
   );

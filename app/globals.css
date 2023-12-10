@@ -85,3 +85,11 @@ body {
 .input-style {
   @apply border border-slate-400 rounded p-2 focus:outline-none focus:outline focus:outline-2 focus:outline-offset-1 focus:outline-blue-500;
 }
+
+.input-style-border-b {
+  @apply border-b border-slate-400 p-2 focus:outline-none focus:border-blue-500  focus:border-b-2;
+}
+
+.icon-size {
+  @apply text-[2.75rem] leading-10;
+}

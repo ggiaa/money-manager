@@ -3,19 +3,37 @@ import { PiTrashBold } from "react-icons/pi";
 import * as Yup from "yup";
 import { useFormik } from "formik";
 import DinamicIcon from "@/app/utils/DinamicIcon";
+import { useBoundedStore } from "@/app/store/boundedStore";
+import { useStore } from "zustand";
 
 const schema = Yup.object().shape({
   category_name: Yup.string().required("Category name cannot be left blank."),
 });
-function AddEditIncomeExpense({ setShowModal }) {
+function AddEditIncomeExpense({ setShowModal, item }) {
+  const boundedStore = useStore(useBoundedStore);
+
   const formik = useFormik({
     initialValues: {
-      icon_name: "LiaBreadSliceSolid",
-      category_name: "",
+      icon_name: item ? item.icon_name : "LiaBreadSliceSolid",
+      category_name: item ? item.category_name : "",
     },
     validationSchema: schema,
     onSubmit: (values) => {
-      console.log(values);
+      const categoryName = values.category_name;
+      const iconName = values.icon_name;
+      const isIncome = item.is_income;
+      const isExpense = item.is_expense;
+      if (item) {
+        const categoryId = item.id;
+        boundedStore.editCategory({
+          categoryId,
+          categoryName,
+          iconName,
+          isIncome,
+          isExpense,
+        });
+      }
+      setShowModal(false);
     },
   });
   const { errors, touched } = formik;

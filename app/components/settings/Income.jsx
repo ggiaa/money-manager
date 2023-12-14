@@ -1,6 +1,6 @@
 import { useBoundedStore } from "@/app/store/boundedStore";
 import React, { useEffect, useState } from "react";
-import { PiSunglasses } from "react-icons/pi";
+import { PiPlusCircleBold } from "react-icons/pi";
 import { useStore } from "zustand";
 import AddEditIncomeExpense from "./AddEditIncomeExpense";
 import DinamicIcon from "@/app/utils/DinamicIcon";
@@ -17,12 +17,27 @@ function Income() {
     setIncome(income);
   };
 
+  const handleAdd = () => {
+    setIncome("");
+    setShowModal(true);
+  };
+
   useEffect(() => {
     boundedStore.getCategories();
   }, []);
 
   return (
     <>
+      <div className="mb-3 flex justify-end">
+        <button
+          onClick={handleAdd}
+          className="bg-sky-500 px-4 py-2 text-white rounded-lg flex items-center shadow-md hover:bg-sky-600 hover:scale-105 transition-all"
+        >
+          <PiPlusCircleBold className="text-2xl mr-2" />
+          Add Category
+        </button>
+      </div>
+
       <div className="grid grid-cols-4 gap-4">
         {incomeCategories.map((income, key) => (
           <div
@@ -39,7 +54,11 @@ function Income() {
       </div>
 
       {showModal && (
-        <AddEditIncomeExpense setShowModal={setShowModal} item={income} />
+        <AddEditIncomeExpense
+          setShowModal={setShowModal}
+          item={income}
+          category="income"
+        />
       )}
     </>
   );

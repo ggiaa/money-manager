@@ -9,7 +9,7 @@ import { useStore } from "zustand";
 const schema = Yup.object().shape({
   category_name: Yup.string().required("Category name cannot be left blank."),
 });
-function AddEditIncomeExpense({ setShowModal, item }) {
+function AddEditIncomeExpense({ setShowModal, item, category }) {
   const boundedStore = useStore(useBoundedStore);
 
   const formik = useFormik({
@@ -31,6 +31,13 @@ function AddEditIncomeExpense({ setShowModal, item }) {
           iconName,
           isIncome,
           isExpense,
+        });
+      } else {
+        const categoryType = category;
+        boundedStore.addCategory({
+          categoryName,
+          iconName,
+          categoryType,
         });
       }
       setShowModal(false);
@@ -216,9 +223,11 @@ function AddEditIncomeExpense({ setShowModal, item }) {
       className="w-screen h-screen absolute top-0 left-0 bg-slate-950 bg-opacity-60 flex justify-center items-center z-20"
     >
       <div className="bg-white py-8 px-16 rounded-lg w-[30rem] relative">
-        <div className="absolute top-0 right-0">
-          <PiTrashBold className="text-2xl mr-3 mt-3 text-red-500 cursor-pointer" />
-        </div>
+        {item && (
+          <div className="absolute top-0 right-0">
+            <PiTrashBold className="text-2xl mr-3 mt-3 text-red-500 cursor-pointer" />
+          </div>
+        )}
 
         <p className="font-semibold mb-4 text-lg text-center">Category</p>
 

@@ -1,8 +1,8 @@
 import {
+  addDoc,
   collection,
   doc,
   getDocs,
-  orderBy,
   query,
   updateDoc,
 } from "firebase/firestore";
@@ -12,15 +12,19 @@ export const categoriesSettingSlice = (set, get) => ({
   incomeCategories: [],
   expenseCategories: [],
   getCategories: async () => {
-    const q = query(collection(db, "categories"), orderBy("category_name"));
+    const q = query(collection(db, "categories"));
     const querySnapshot = await getDocs(q);
     const filteredData = querySnapshot.docs.map((doc) => ({
       ...doc.data(),
       id: doc.id,
     }));
 
-    const income = filteredData.filter((category) => category.is_income);
-    const expense = filteredData.filter((category) => category.is_expense);
+    const income = filteredData
+      .filter((category) => category.is_income)
+      .sort((a, b) => a.category_name.localeCompare(b.category_name));
+    const expense = filteredData
+      .filter((category) => category.is_expense)
+      .sort((a, b) => a.category_name.localeCompare(b.category_name));
 
     set({ incomeCategories: income, expenseCategories: expense });
   },
@@ -40,6 +44,25 @@ export const categoriesSettingSlice = (set, get) => ({
       });
 
       set({ incomeCategories: income });
+    }
+  },
+  addCategory: async (params) => {
+    const newCategory = {
+      category_name: params.categoryName,
+      icon_name: params.iconName,
+      is_income: params.categoryType == "income",
+      is_expense: params.categoryType == "expense",
+    };
+
+    const docRef = await addDoc(collection(db, "categories"), newCategory);
+
+    const joinedIncome = [...get().incomeCategories, newCategory].sort((a, b) =>
+      a.category_name.localeCompare(b.category_name)
+    );
+
+    console.log(joinedIncome);
+    if (params.categoryType == "income") {
+      set({ incomeCategories: joinedIncome });
     }
   },
 });

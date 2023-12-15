@@ -8,7 +8,7 @@ function Expense() {
 
   const expenseCategories = useBoundedStore((state) => state.expenseCategories);
 
-  console.log(expenseCategories);
+  // console.log(expenseCategories);
 
   useEffect(() => {
     boundedStore.getCategories();

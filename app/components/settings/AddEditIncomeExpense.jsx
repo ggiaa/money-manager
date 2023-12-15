@@ -52,6 +52,12 @@ function AddEditIncomeExpense({ setShowModal, item, category }) {
     setShowModal(false);
   };
 
+  const handleDelete = () => {
+    const id = item.id;
+    boundedStore.deleteCategory({ id, category });
+    setShowModal(false);
+  };
+
   const icons = {
     "Foods & Drinks": [
       "LiaBreadSliceSolid",
@@ -224,7 +230,7 @@ function AddEditIncomeExpense({ setShowModal, item, category }) {
     >
       <div className="bg-white py-8 px-16 rounded-lg w-[30rem] relative">
         {item && (
-          <div className="absolute top-0 right-0">
+          <div className="absolute top-0 right-0" onClick={handleDelete}>
             <PiTrashBold className="text-2xl mr-3 mt-3 text-red-500 cursor-pointer" />
           </div>
         )}

@@ -1,6 +1,7 @@
 import {
   addDoc,
   collection,
+  deleteDoc,
   doc,
   getDocs,
   query,
@@ -60,9 +61,18 @@ export const categoriesSettingSlice = (set, get) => ({
       a.category_name.localeCompare(b.category_name)
     );
 
-    console.log(joinedIncome);
     if (params.categoryType == "income") {
       set({ incomeCategories: joinedIncome });
+    }
+  },
+  deleteCategory: async ({ id, category }) => {
+    await deleteDoc(doc(db, "categories", id));
+
+    if (category == "income") {
+      const inc = get().incomeCategories.filter(
+        (category) => category.id !== id
+      );
+      set({ incomeCategories: inc });
     }
   },
 });

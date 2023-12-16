@@ -12,9 +12,15 @@ function Expense() {
   const [showModal, setShowModal] = useState(false);
   const [expense, setExpense] = useState("");
 
-  const handleAdd = () => {};
+  const handleAdd = () => {
+    setExpense("");
+    setShowModal(true);
+  };
 
-  const handleClick = (expense) => {};
+  const handleClick = (expense) => {
+    setExpense(expense);
+    setShowModal(true);
+  };
 
   useEffect(() => {
     boundedStore.getCategories();

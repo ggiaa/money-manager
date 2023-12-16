@@ -57,12 +57,18 @@ export const categoriesSettingSlice = (set, get) => ({
 
     const docRef = await addDoc(collection(db, "categories"), newCategory);
 
-    const joinedIncome = [...get().incomeCategories, newCategory].sort((a, b) =>
-      a.category_name.localeCompare(b.category_name)
-    );
-
     if (params.categoryType == "income") {
+      const joinedIncome = [...get().incomeCategories, newCategory].sort(
+        (a, b) => a.category_name.localeCompare(b.category_name)
+      );
+
       set({ incomeCategories: joinedIncome });
+    } else {
+      const joinedExpense = [...get().expenseCategories, newCategory].sort(
+        (a, b) => a.category_name.localeCompare(b.category_name)
+      );
+
+      set({ expenseCategories: joinedExpense });
     }
   },
   deleteCategory: async ({ id, category }) => {

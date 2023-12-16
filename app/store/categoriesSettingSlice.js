@@ -45,6 +45,16 @@ export const categoriesSettingSlice = (set, get) => ({
       });
 
       set({ incomeCategories: income });
+    } else {
+      const expense = get().expenseCategories.map((expense) => {
+        if (expense.id == params.categoryId) {
+          expense["category_name"] = params.categoryName;
+          expense["icon_name"] = params.iconName;
+        }
+        return expense;
+      });
+
+      set({ expenseCategories: expense });
     }
   },
   addCategory: async (params) => {

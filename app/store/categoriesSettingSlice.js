@@ -96,4 +96,19 @@ export const categoriesSettingSlice = (set, get) => ({
       set({ expenseCategories: exp });
     }
   },
+  updateSubCategory: async ({ categoryId, newSubCategory }) => {
+    await updateDoc(doc(db, "categories", categoryId), {
+      sub_category: newSubCategory,
+    });
+
+    const exp = get().expenseCategories.map((category) => {
+      if (category.id == categoryId) {
+        category["sub_category"] = newSubCategory;
+      }
+
+      return category;
+    });
+
+    set({ expenseCategories: exp });
+  },
 });

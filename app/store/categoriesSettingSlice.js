@@ -58,14 +58,16 @@ export const categoriesSettingSlice = (set, get) => ({
     }
   },
   addCategory: async (params) => {
-    const newCategory = {
+    const category = {
       category_name: params.categoryName,
       icon_name: params.iconName,
       is_income: params.categoryType == "income",
       is_expense: params.categoryType == "expense",
     };
 
-    const docRef = await addDoc(collection(db, "categories"), newCategory);
+    const docRef = await addDoc(collection(db, "categories"), category);
+
+    const newCategory = { ...category, id: docRef.id };
 
     if (params.categoryType == "income") {
       const joinedIncome = [...get().incomeCategories, newCategory].sort(

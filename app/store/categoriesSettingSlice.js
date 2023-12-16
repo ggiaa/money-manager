@@ -89,6 +89,11 @@ export const categoriesSettingSlice = (set, get) => ({
         (category) => category.id !== id
       );
       set({ incomeCategories: inc });
+    } else {
+      const exp = get().expenseCategories.filter(
+        (category) => category.id !== id
+      );
+      set({ expenseCategories: exp });
     }
   },
 });

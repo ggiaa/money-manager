@@ -1,5 +1,5 @@
 import Link from "next/link";
-import React from "react";
+import React, { useState } from "react";
 import {
   AiOutlineHome,
   AiOutlineLineChart,
@@ -7,8 +7,10 @@ import {
   AiOutlineSetting,
   AiOutlinePlus,
 } from "react-icons/ai";
+import AddEditTransaction from "./AddEditTransaction";
 
 function BottomNavbar({ segments }) {
+  const [modalOpen, setModalOpen] = useState(false);
   return (
     <div className="bg-white grid grid-cols-5 items-center text-center gap-4 w-2/5 rounded-full py-1 shadow-lg border border-slate-300">
       {/* Home Link */}
@@ -93,6 +95,8 @@ function BottomNavbar({ segments }) {
           </p>
         </Link>
       </div>
+
+      <AddEditTransaction modalOpen={modalOpen} setModalOpen={setModalOpen} />
     </div>
   );
 }

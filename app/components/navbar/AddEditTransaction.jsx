@@ -6,6 +6,7 @@ import { NumericFormat } from "react-number-format";
 import * as Yup from "yup";
 import { useStore } from "zustand";
 import Datepicker from "react-tailwindcss-datepicker";
+import { PiCreditCard, PiGearSix } from "react-icons/pi";
 
 const schema = Yup.object().shape({
   amount: Yup.string().required("Transaction amount cannot be left blank"),
@@ -18,23 +19,30 @@ const schema = Yup.object().shape({
 function AddEditTransaction({ modalOpen, setModalOpen }) {
   const [categoryDisplay, setCategoryDisplay] = useState(false);
   const [subCategoryDisplay, setSubCategoryDisplay] = useState(false);
+  const [accountDisplay, setAccountDisplay] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState("");
   const [activeCategoryTab, setActiveCategoryTab] = useState(1);
   const boundedStore = useStore(useBoundedStore);
   const expenseCategories = useBoundedStore((state) => state.expenseCategories);
   const incomeCategories = useBoundedStore((state) => state.incomeCategories);
+  const accounts = useBoundedStore((state) => state.accounts);
+  // const defaultAccount = accounts.filter((acc) => acc.priority);
 
+  // if(defaultAccount)
+  // console.log(defaultAccount.length);
   const formik = useFormik({
     initialValues: {
       amount: "",
       category1: "Uncategorized",
       category2: "Uncategorized",
       date: { startDate: new Date(), endDate: new Date() },
+      account: "",
+      accountId: "",
       note: "",
     },
     validationSchema: schema,
     onSubmit: (values) => {
-      console.log(values);
+      boundedStore.addTransaction(values);
     },
   });
   const { errors, touched } = formik;
@@ -48,6 +56,8 @@ function AddEditTransaction({ modalOpen, setModalOpen }) {
       setSubCategoryDisplay(false);
     } else if (categoryDisplay) {
       setCategoryDisplay(false);
+    } else if (accountDisplay) {
+      setAccountDisplay(false);
     } else {
       setModalOpen(false);
       formik.resetForm();
@@ -85,9 +95,28 @@ function AddEditTransaction({ modalOpen, setModalOpen }) {
     setDate(newValue);
   };
 
+  const handleSelectAccount = (account) => {
+    formik.setFieldValue("account", account.account_name);
+    formik.setFieldValue("accountId", account.id);
+    setAccountDisplay(false);
+  };
+
+  const chooseAccount = () => {
+    setAccountDisplay(true);
+  };
+
   useEffect(() => {
     boundedStore.getCategories();
+    boundedStore.getAccounts();
   }, []);
+
+  useEffect(() => {
+    if (accounts.length) {
+      const defaultAcc = accounts.filter((acc) => acc.priority);
+      formik.setFieldValue("account", defaultAcc[0]["account_name"]);
+      formik.setFieldValue("accountId", defaultAcc[0]["id"]);
+    }
+  }, [modalOpen]);
 
   return (
     <div
@@ -145,7 +174,16 @@ function AddEditTransaction({ modalOpen, setModalOpen }) {
               onClick={chooseCategory}
               readOnly
             />
-
+            <input
+              type="text"
+              placeholder="Account"
+              className="input-style-outline-none w-full"
+              name="account"
+              autoComplete="off"
+              value={formik.values.account}
+              onClick={chooseAccount}
+              readOnly
+            />
             <input
               type="text"
               placeholder="Note"
@@ -165,7 +203,7 @@ function AddEditTransaction({ modalOpen, setModalOpen }) {
 
         {/* Element to display category */}
         <div
-          className={`bg-white absolute bottom-0 left-0 w-full ease-in duration-300 flex flex-col overflow-hidden ${
+          className={`bg-white absolute bottom-0 left-0 w-full ease-in duration-300 flex flex-col overflow-hidden rounded-md ${
             categoryDisplay ? "h-full" : "h-0"
           }`}
         >
@@ -247,7 +285,7 @@ function AddEditTransaction({ modalOpen, setModalOpen }) {
 
         {/* Element to display sub category */}
         <div
-          className={`bg-white absolute bottom-0 left-0 w-full ease-in duration-300 flex flex-col overflow-auto ${
+          className={`bg-white absolute bottom-0 left-0 w-full ease-in duration-300 flex flex-col overflow-auto rounded-md ${
             subCategoryDisplay ? "h-full" : "h-0"
           }`}
         >
@@ -264,6 +302,41 @@ function AddEditTransaction({ modalOpen, setModalOpen }) {
                   />
                 </div>
                 <p className="text-sm mt-1">{subcategory}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Element to display account */}
+        <div
+          className={`bg-white absolute bottom-0 left-0 w-full ease-in duration-300 flex flex-col overflow-auto rounded-md ${
+            accountDisplay ? "h-full" : "h-0"
+          }`}
+        >
+          <div className="grid grid-cols-2 gap-y-4 my-6 mx-4 gap-x-4">
+            {accounts?.map((account, i) => (
+              <div
+                className="flex items-center bg-sky-600 text-white py-3 px-4 rounded-xl shadow-md cursor-pointer"
+                key={i}
+                onClick={() => handleSelectAccount(account)}
+              >
+                <div className="bg-orange-400 rounded-full p-2 mr-4">
+                  <PiCreditCard className="text-3xl" />
+                </div>
+                <div className="h-full flex flex-col justify-between">
+                  <p className="text-left font-semibold">
+                    {account.account_name}
+                  </p>
+                  <p className="text-sm">
+                    <NumericFormat
+                      value={account.account_balance}
+                      displayType={"text"}
+                      thousandSeparator="."
+                      decimalSeparator=","
+                      prefix={"Rp"}
+                    />
+                  </p>
+                </div>
               </div>
             ))}
           </div>

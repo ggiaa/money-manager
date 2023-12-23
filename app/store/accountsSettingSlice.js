@@ -55,4 +55,36 @@ export const accountsSettingSlice = (set, get) => ({
     const acc = get().accounts.filter((account) => account.id !== accountId);
     set({ accounts: acc });
   },
+  subtractBalance: async ({ id, amount }) => {
+    const updatedAccounts = await get().accounts.map((acc) => {
+      const account = acc;
+      if (account.id == id) {
+        const newBalance = parseInt(account.account_balance) - parseInt(amount);
+        account.account_balance = newBalance;
+        updateDoc(doc(db, "accounts", id), {
+          account_balance: newBalance,
+        });
+      }
+
+      return account;
+    });
+
+    set({ accounts: updatedAccounts });
+  },
+  addBalance: async ({ id, amount }) => {
+    const updatedAccounts = await get().accounts.map((acc) => {
+      const account = acc;
+      if (account.id == id) {
+        const newBalance = parseInt(account.account_balance) + parseInt(amount);
+        account.account_balance = newBalance;
+        updateDoc(doc(db, "accounts", id), {
+          account_balance: newBalance,
+        });
+      }
+
+      return account;
+    });
+
+    set({ accounts: updatedAccounts });
+  },
 });

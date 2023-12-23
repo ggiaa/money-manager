@@ -26,23 +26,27 @@ function AddEditTransaction({ modalOpen, setModalOpen }) {
   const expenseCategories = useBoundedStore((state) => state.expenseCategories);
   const incomeCategories = useBoundedStore((state) => state.incomeCategories);
   const accounts = useBoundedStore((state) => state.accounts);
-  // const defaultAccount = accounts.filter((acc) => acc.priority);
 
-  // if(defaultAccount)
-  // console.log(defaultAccount.length);
+  console.log(incomeCategories);
+  console.log(accounts);
   const formik = useFormik({
     initialValues: {
       amount: "",
       category1: "Uncategorized",
       category2: "Uncategorized",
+      icon: "",
       date: { startDate: new Date(), endDate: new Date() },
       account: "",
       accountId: "",
       note: "",
+      is_income: "",
+      is_expense: "",
     },
     validationSchema: schema,
     onSubmit: (values) => {
       boundedStore.addTransaction(values);
+      setModalOpen(false);
+      formik.resetForm();
     },
   });
   const { errors, touched } = formik;
@@ -69,6 +73,9 @@ function AddEditTransaction({ modalOpen, setModalOpen }) {
   };
 
   const handleSelectCategory = (category) => {
+    formik.setFieldValue("icon", category.icon_name);
+    formik.setFieldValue("is_income", category.is_income);
+    formik.setFieldValue("is_expense", category.is_expense);
     if (category.sub_category) {
       setSubCategoryDisplay(true);
       setSelectedCategory(category);
@@ -113,8 +120,10 @@ function AddEditTransaction({ modalOpen, setModalOpen }) {
   useEffect(() => {
     if (accounts.length) {
       const defaultAcc = accounts.filter((acc) => acc.priority);
-      formik.setFieldValue("account", defaultAcc[0]["account_name"]);
-      formik.setFieldValue("accountId", defaultAcc[0]["id"]);
+      if (defaultAcc.length) {
+        formik.setFieldValue("account", defaultAcc[0]["account_name"]);
+        formik.setFieldValue("accountId", defaultAcc[0]["id"]);
+      }
     }
   }, [modalOpen]);
 
@@ -156,7 +165,10 @@ function AddEditTransaction({ modalOpen, setModalOpen }) {
                 prefix={"Rp"}
                 name="amount"
                 value={formik.values.amount}
-                onChange={formik.handleChange}
+                onValueChange={(values) =>
+                  formik.setFieldValue("amount", values.value)
+                }
+                // onChange={formik.handleChange}
               />
               {errors.amount && touched.amount && (
                 <p className="text-sm text-left text-red-600">

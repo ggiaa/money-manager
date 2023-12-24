@@ -149,6 +149,7 @@ import {
   PiWheelchair,
   PiWine,
   PiMusicNote,
+  PiQuestion,
 } from "react-icons/pi";
 import { BsCake } from "react-icons/bs";
 import { LuPizza } from "react-icons/lu";
@@ -307,6 +308,7 @@ export {
   PiWheelchair,
   PiWine,
   PiMusicNote,
+  PiQuestion,
   BsCake,
   LuPizza,
   BiBowlHot,

@@ -1,4 +1,5 @@
 import Image from "next/image";
+import RecentTransactions from "./components/home/RecentTransactions";
 
 export default function Home() {
   return (
@@ -23,8 +24,9 @@ export default function Home() {
           1
         </div>
       </div>
-      <div className="col-span-3 row-span-6 bg-white rounded-lg shadow-lg">
-        Recent Transaction
+      <div className="col-span-3 row-span-6 bg-white rounded-lg shadow-lg p-4 flex flex-col">
+        <p>Recent Transactions</p>
+        <RecentTransactions />
       </div>
     </div>
   );

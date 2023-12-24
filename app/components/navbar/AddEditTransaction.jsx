@@ -27,14 +27,12 @@ function AddEditTransaction({ modalOpen, setModalOpen }) {
   const incomeCategories = useBoundedStore((state) => state.incomeCategories);
   const accounts = useBoundedStore((state) => state.accounts);
 
-  console.log(incomeCategories);
-  console.log(accounts);
   const formik = useFormik({
     initialValues: {
       amount: "",
       category1: "Uncategorized",
       category2: "Uncategorized",
-      icon: "",
+      icon: "PiQuestion",
       date: { startDate: new Date(), endDate: new Date() },
       account: "",
       accountId: "",
@@ -98,7 +96,6 @@ function AddEditTransaction({ modalOpen, setModalOpen }) {
   };
 
   const handleDateChange = (newValue) => {
-    console.log("newValue:", newValue);
     setDate(newValue);
   };
 

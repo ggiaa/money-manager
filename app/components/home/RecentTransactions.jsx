@@ -1,11 +1,12 @@
 "use client";
 import { NumericFormat } from "react-number-format";
 import DinamicIcon from "@/app/utils/DinamicIcon";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import moment from "moment";
 import { useBoundedStore } from "@/app/store/boundedStore";
 import { useStore } from "zustand";
 import { PiTrash, PiNotePencil } from "react-icons/pi";
+import AddEditTransaction from "../navbar/AddEditTransaction";
 
 function RecentTransactions() {
   const boundedStore = useStore(useBoundedStore);
@@ -13,6 +14,15 @@ function RecentTransactions() {
     0,
     8
   );
+
+  const [modalOpen, setModalOpen] = useState(false);
+  const [editedData, setEditedData] = useState("");
+
+  const handleEditTransaction = (transactionData) => {
+    setModalOpen(true);
+    setEditedData(transactionData);
+  };
+
   useEffect(() => {
     boundedStore.getTransactions();
   }, []);
@@ -51,7 +61,7 @@ function RecentTransactions() {
               />
             </p>
             <p className="text-xs mt-1">
-              {moment(transaction.date.toDate()).calendar(null, {
+              {moment(transaction.date).calendar(null, {
                 sameDay: "[Today]",
                 nextDay: "[Tomorrow]",
                 nextWeek: "dddd",
@@ -62,7 +72,10 @@ function RecentTransactions() {
             </p>
 
             <div className="absolute cursor-pointer group-hover:right-0 transition-all duration-500 transform translate-x-0 ease -right-36 flex items-center h-full top-0">
-              <div className="bg-sky-400 px-4 h-full flex items-center hover:bg-sky-500 hover:text-white">
+              <div
+                className="bg-sky-400 px-4 h-full flex items-center hover:bg-sky-500 hover:text-white"
+                onClick={() => handleEditTransaction(transaction)}
+              >
                 <PiNotePencil className="text-xl" />
               </div>
               <div className="bg-red-400 px-4 h-full flex items-center hover:bg-red-500 hover:text-white">
@@ -72,6 +85,12 @@ function RecentTransactions() {
           </div>
         </div>
       ))}
+
+      <AddEditTransaction
+        modalOpen={modalOpen}
+        setModalOpen={setModalOpen}
+        transactionData={editedData}
+      />
     </div>
   );
 }

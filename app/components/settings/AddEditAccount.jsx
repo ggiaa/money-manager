@@ -98,7 +98,9 @@ function AddEditAccount({ setShowModal, account = null }) {
                 prefix={"Rp"}
                 name="account_balance"
                 value={formik.values.account_balance}
-                onChange={formik.handleChange}
+                onValueChange={(values) =>
+                  formik.setFieldValue("account_balance", values.value)
+                }
               />
               {errors.account_balance && touched.account_balance && (
                 <span className="text-sm text-red-600">

@@ -25,7 +25,7 @@ export const accountsSettingSlice = (set, get) => ({
   addAccount: async (params) => {
     const newAccount = {
       account_name: params.accountName,
-      account_balance: params.accountBalance,
+      account_balance: parseInt(params.accountBalance),
       created_at: new Date(),
     };
 
@@ -37,13 +37,13 @@ export const accountsSettingSlice = (set, get) => ({
   editAccount: async (params) => {
     await updateDoc(doc(db, "accounts", params.accountId), {
       account_name: params.accountName,
-      account_balance: params.accountBalance,
+      account_balance: parseInt(params.accountBalance),
     });
 
     const acc = get().accounts.map((account) => {
       if (account.id == params.accountId) {
         account["account_name"] = params.accountName;
-        account["account_balance"] = params.accountBalance;
+        account["account_balance"] = parseInt(params.accountBalance);
       }
       return account;
     });
@@ -86,5 +86,74 @@ export const accountsSettingSlice = (set, get) => ({
     });
 
     set({ accounts: updatedAccounts });
+  },
+  recalculateBalance: async (originalTransaction, editedTransaction) => {
+    const allAccounts = get().accounts;
+    const originalAccID = originalTransaction.account_id;
+    const editAccID = editedTransaction.account_id;
+    const originalTransAmount = originalTransaction.amount;
+    const editTransAmount = editedTransaction.amount;
+
+    if (originalAccID != editAccID) {
+      allAccounts.map((acc) => {
+        const account = acc;
+        let revertedBalance = account.account_balance;
+        if (account.id == originalAccID) {
+          if (originalTransaction.is_income) {
+            revertedBalance -= originalTransAmount;
+          } else if (originalTransaction.is_expense) {
+            revertedBalance += originalTransAmount;
+          }
+
+          updateDoc(doc(db, "accounts", originalAccID), {
+            account_balance: revertedBalance,
+          });
+        }
+
+        if (account.id == editAccID) {
+          if (editedTransaction.is_income) {
+            revertedBalance += editTransAmount;
+          } else if (editedTransaction.is_expense) {
+            revertedBalance -= editTransAmount;
+          }
+
+          updateDoc(doc(db, "accounts", editAccID), {
+            account_balance: revertedBalance,
+          });
+        }
+
+        account.account_balance = revertedBalance;
+
+        return account;
+      });
+    } else {
+      allAccounts.map((acc) => {
+        const account = acc;
+        let updatedBalance = account.account_balance;
+        if (account.id == originalAccID) {
+          if (originalTransaction.is_income) {
+            updatedBalance -= originalTransAmount;
+          } else if (originalTransaction.is_expense) {
+            updatedBalance += originalTransAmount;
+          }
+
+          if (editedTransaction.is_income) {
+            updatedBalance += editTransAmount;
+          } else if (editedTransaction.is_expense) {
+            updatedBalance -= editTransAmount;
+          }
+
+          updateDoc(doc(db, "accounts", originalAccID), {
+            account_balance: updatedBalance,
+          });
+        }
+
+        account.account_balance = updatedBalance;
+
+        return account;
+      });
+    }
+
+    set({ accounts: allAccounts });
   },
 });

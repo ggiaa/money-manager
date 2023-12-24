@@ -16,7 +16,11 @@ const schema = Yup.object().shape({
   }),
 });
 
-function AddEditTransaction({ modalOpen, setModalOpen }) {
+function AddEditTransaction({
+  modalOpen,
+  setModalOpen,
+  transactionData = null,
+}) {
   const [categoryDisplay, setCategoryDisplay] = useState(false);
   const [subCategoryDisplay, setSubCategoryDisplay] = useState(false);
   const [accountDisplay, setAccountDisplay] = useState(false);
@@ -42,7 +46,11 @@ function AddEditTransaction({ modalOpen, setModalOpen }) {
     },
     validationSchema: schema,
     onSubmit: (values) => {
-      boundedStore.addTransaction(values);
+      if (transactionData) {
+        boundedStore.editTransaction(transactionData.id, values);
+      } else {
+        boundedStore.addTransaction(values);
+      }
       setModalOpen(false);
       formik.resetForm();
     },
@@ -121,6 +129,22 @@ function AddEditTransaction({ modalOpen, setModalOpen }) {
         formik.setFieldValue("account", defaultAcc[0]["account_name"]);
         formik.setFieldValue("accountId", defaultAcc[0]["id"]);
       }
+    }
+
+    if (transactionData) {
+      formik.setFieldValue("amount", transactionData.amount);
+      formik.setFieldValue("category1", transactionData.category);
+      formik.setFieldValue("category2", transactionData.sub_category);
+      formik.setFieldValue("icon", transactionData.icon);
+      formik.setFieldValue("date", {
+        startDate: new Date(transactionData.date),
+        endDate: new Date(transactionData.date),
+      });
+      formik.setFieldValue("account", transactionData.account);
+      formik.setFieldValue("accountId", transactionData.account_id);
+      formik.setFieldValue("note", transactionData.note);
+      formik.setFieldValue("is_income", transactionData.is_income);
+      formik.setFieldValue("is_expense", transactionData.is_expense);
     }
   }, [modalOpen]);
 
@@ -260,7 +284,7 @@ function AddEditTransaction({ modalOpen, setModalOpen }) {
             <div className="grid grid-cols-4 gap-y-8 mt-2 mb-6">
               {activeCategoryTab == 1 &&
                 expenseCategories.map((category, i) => (
-                  <div key={i} className="cursor-pointer w-full">
+                  <div key={i} className="cursor-pointer w-full text-center">
                     <div
                       className="rounded-full bg-sky-300 aspect-square flex items-center justify-center p-2 shadow-lg cursor-pointer hover:bg-sky-400 w-4/12 mx-auto"
                       onClick={() => handleSelectCategory(category)}
@@ -275,7 +299,7 @@ function AddEditTransaction({ modalOpen, setModalOpen }) {
                 ))}
               {activeCategoryTab == 2 &&
                 incomeCategories.map((category, i) => (
-                  <div key={i} className="cursor-pointer">
+                  <div key={i} className="cursor-pointer w-full text-center">
                     <div
                       className="rounded-full bg-sky-300 aspect-square flex items-center justify-center p-2 shadow-lg cursor-pointer hover:bg-sky-400 w-4/12 mx-auto"
                       onClick={() => handleSelectCategory(category)}
@@ -300,7 +324,7 @@ function AddEditTransaction({ modalOpen, setModalOpen }) {
         >
           <div className="grid grid-cols-4 gap-y-8 my-6">
             {selectedCategory?.sub_category?.map((subcategory, i) => (
-              <div key={i} className="cursor-pointer w-full">
+              <div key={i} className="cursor-pointer w-full text-center">
                 <div
                   className="rounded-full bg-sky-300 aspect-square flex items-center justify-center p-2 shadow-lg cursor-pointer hover:bg-sky-400 w-4/12 mx-auto"
                   onClick={() => handleSelectSubCategory(subcategory)}

@@ -2,6 +2,7 @@ import {
   Timestamp,
   addDoc,
   collection,
+  deleteDoc,
   doc,
   getDocs,
   orderBy,
@@ -89,6 +90,24 @@ export const transactionsSlice = (set, get) => ({
 
     if (editedTransaction.is_income || editedTransaction.is_expense) {
       get().recalculateBalance(originalTransaction[0], editedTransaction);
+    }
+  },
+  deleteTransaction: async (transaction) => {
+    const accountId = transaction.account_id;
+    const amount = transaction.amount;
+    await deleteDoc(doc(db, "transactions", transaction.id));
+    const updatedTransactions = get().transactions.filter(
+      (trans) => trans.id !== transaction.id
+    );
+
+    set({ transactions: updatedTransactions });
+
+    if (transaction.is_income) {
+      get().subtractBalance({ id: accountId, amount: amount });
+    }
+
+    if (transaction.is_expense) {
+      get().addBalance({ id: accountId, amount: amount });
     }
   },
 });

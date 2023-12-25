@@ -23,6 +23,10 @@ function RecentTransactions() {
     setEditedData(transactionData);
   };
 
+  const handleDeleteTransaction = (transactionData) => {
+    boundedStore.deleteTransaction(transactionData);
+  };
+
   useEffect(() => {
     boundedStore.getTransactions();
   }, []);
@@ -78,7 +82,10 @@ function RecentTransactions() {
               >
                 <PiNotePencil className="text-xl" />
               </div>
-              <div className="bg-red-400 px-4 h-full flex items-center hover:bg-red-500 hover:text-white">
+              <div
+                className="bg-red-400 px-4 h-full flex items-center hover:bg-red-500 hover:text-white"
+                onClick={() => handleDeleteTransaction(transaction)}
+              >
                 <PiTrash className="text-xl" />
               </div>
             </div>

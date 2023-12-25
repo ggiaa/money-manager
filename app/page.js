@@ -1,5 +1,6 @@
 import Image from "next/image";
 import RecentTransactions from "./components/home/RecentTransactions";
+import CurrentWeekStatistic from "./components/home/CurrentWeekStatistic";
 
 export default function Home() {
   return (
@@ -21,7 +22,7 @@ export default function Home() {
           </div>
         </div>
         <div className="col-span-12 row-span-4 bg-white rounded-lg shadow-lg">
-          1
+          <CurrentWeekStatistic />
         </div>
       </div>
       <div className="col-span-3 row-span-6 bg-white rounded-lg shadow-lg p-4 flex flex-col">

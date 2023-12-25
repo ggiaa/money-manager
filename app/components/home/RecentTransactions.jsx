@@ -39,7 +39,11 @@ function RecentTransactions() {
             <div className="items-center flex w-full gap-x-1">
               <div
                 className={`${
-                  transaction.is_income ? "bg-green-600" : "bg-red-600"
+                  transaction.is_income
+                    ? "bg-green-600"
+                    : transaction.is_expense
+                    ? "bg-red-600"
+                    : "bg-gray-500"
                 } rounded-full p-2 aspect-square text-white mr-2`}
               >
                 <DinamicIcon style="text-2xl" iconName={transaction.icon} />

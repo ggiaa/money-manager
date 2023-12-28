@@ -8,11 +8,14 @@ import {
   orderBy,
   query,
   updateDoc,
+  where,
 } from "firebase/firestore";
 import { db } from "../config/firebase";
+import moment from "moment";
 
 export const transactionsSlice = (set, get) => ({
   transactions: [],
+  monthlyTransactions: [],
   getTransactions: async () => {
     const q = query(collection(db, "transactions"), orderBy("date", "desc"));
     const querySnapshot = await getDocs(q);
@@ -23,6 +26,21 @@ export const transactionsSlice = (set, get) => ({
     }));
 
     set({ transactions: filteredData });
+  },
+  getMonthlyTransactions: async ({ startDate, endDate }) => {
+    const q = query(
+      collection(db, "transactions"),
+      where("date", ">=", moment(startDate).toDate()),
+      where("date", "<=", moment(endDate).toDate())
+    );
+    const querySnapshot = await getDocs(q);
+    const filteredData = querySnapshot.docs.map((doc) => ({
+      ...doc.data(),
+      id: doc.id,
+      date: doc.data().date.toDate(),
+    }));
+
+    set({ monthlyTransactions: filteredData });
   },
   addTransaction: async (params) => {
     const newTransactionData = {

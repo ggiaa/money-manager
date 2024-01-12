@@ -45,6 +45,8 @@ function AddEditBudget({ setAddEditModalDisplay, budget = null }) {
     validationSchema: schema,
     onSubmit: (values) => {
       boundedStore.addBudgets(values, expenseCategories);
+      setAddEditModalDisplay(false);
+      formik.resetForm();
     },
   });
   const { errors, touched } = formik;

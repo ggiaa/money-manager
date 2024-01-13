@@ -22,29 +22,62 @@ function AddEditBudget({ setAddEditModalDisplay, budget = null }) {
   const [categoryDisplay, setCategoryDisplay] = useState(false);
   const [subCategoryDisplay, setSubCategoryDisplay] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState("");
+  let totalSelectedCategory = 0;
   const boundedStore = useStore(useBoundedStore);
   const [expenseCategories, setexpenseCategories] = useState(
     useBoundedStore((state) => state.expenseCategories).map((category) => {
+      let categorySelected = false;
       const subcategory = category.sub_category.map((sub) => {
+        let selected = false;
+        const targetObject = {
+          category: category.category_name,
+          sub_category: sub,
+        };
+        if (budget) {
+          budget.budget_categories.some((obj) => {
+            if (
+              Object.keys(targetObject).every(
+                (key) => obj[key] === targetObject[key]
+              )
+            ) {
+              selected = true;
+              categorySelected = true;
+              totalSelectedCategory++;
+            }
+          });
+        }
+
         const subcategoriesObject = {
           name: sub,
-          selected: false,
+          selected: selected,
         };
         return subcategoriesObject;
       });
-      return { ...category, selected: false, sub_category: subcategory };
+      return {
+        ...category,
+        selected: categorySelected,
+        sub_category: subcategory,
+      };
     })
   );
 
   const formik = useFormik({
     initialValues: {
-      name: "",
-      amount: "",
-      categories: "",
+      name: budget ? budget.budget_name : "",
+      amount: budget ? budget.budget_amount : "",
+      categories: totalSelectedCategory
+        ? totalSelectedCategory > 1
+          ? totalSelectedCategory + " categories selected"
+          : totalSelectedCategory + " category selected"
+        : "",
     },
     validationSchema: schema,
     onSubmit: (values) => {
-      boundedStore.addBudgets(values, expenseCategories);
+      if (budget) {
+        boundedStore.editBudgets(values, expenseCategories, budget.id);
+      } else {
+        boundedStore.addBudgets(values, expenseCategories);
+      }
       setAddEditModalDisplay(false);
       formik.resetForm();
     },
@@ -90,12 +123,6 @@ function AddEditBudget({ setAddEditModalDisplay, budget = null }) {
     }
   };
 
-  const handleSelectSubCategory = (subCategoryName) => {
-    setSubCategoryDisplay(false);
-    setCategoryDisplay(false);
-    setSelectedCategory("");
-  };
-
   const checkCategory = (category) => {
     const newexpenseCategories = expenseCategories.map((cat) => {
       if (cat.id == category.id) {
@@ -130,6 +157,8 @@ function AddEditBudget({ setAddEditModalDisplay, budget = null }) {
         // unselec category kalau tidak ada subcategory yang dipilih
         if (!expense.sub_category.some((obj) => obj.selected == true)) {
           expense.selected = false;
+        } else {
+          expense.selected = true;
         }
       }
       return expense;
@@ -271,7 +300,9 @@ function AddEditBudget({ setAddEditModalDisplay, budget = null }) {
               >
                 <div
                   className="rounded-full bg-sky-300 aspect-square flex items-center justify-center p-2 shadow-lg cursor-pointer hover:bg-sky-400 w-4/12 mx-auto"
-                  onClick={() => handleSelectSubCategory(subcategory)}
+                  onClick={() =>
+                    checkSubCategory(selectedCategory, subcategory)
+                  }
                 >
                   <DinamicIcon
                     style="text-2xl"

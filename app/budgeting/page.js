@@ -8,9 +8,18 @@ import { useBoundedStore } from "../store/boundedStore";
 function budgeting() {
   const boundedStore = useStore(useBoundedStore);
   const [addEditModalDisplay, setAddEditModalDisplay] = useState(false);
+  const [selectedBudget, setSelectedBudget] = useState("");
   const budgets = useBoundedStore((state) => state.budgets);
 
-  console.log(budgets);
+  const handleEdit = (budget) => {
+    setSelectedBudget(budget);
+    setAddEditModalDisplay(true);
+  };
+
+  const handleAdd = () => {
+    setAddEditModalDisplay(true);
+    setSelectedBudget("");
+  };
 
   useEffect(() => {
     boundedStore.getBudgets();
@@ -140,7 +149,7 @@ function budgeting() {
     <div className="p-2 flex flex-col h-full">
       <div className="mb-3 flex justify-end">
         <button
-          onClick={() => setAddEditModalDisplay(true)}
+          onClick={handleAdd}
           className="bg-sky-500 px-4 py-2 text-white rounded-lg flex items-center shadow-md hover:bg-sky-600 hover:scale-105 transition-all"
         >
           <PiPlusCircleBold className="text-2xl mr-2" />
@@ -149,7 +158,9 @@ function budgeting() {
       </div>
       <div className="h-full">
         {budgets.length ? (
-          <div>ada</div>
+          budgets.map((budget) => (
+            <div onClick={() => handleEdit(budget)}>teks</div>
+          ))
         ) : (
           <div className="flex justify-center items-center h-full text-lg text-slate-600">
             There is no budget yet.
@@ -158,7 +169,10 @@ function budgeting() {
       </div>
 
       {addEditModalDisplay && (
-        <AddEditBudget setAddEditModalDisplay={setAddEditModalDisplay} />
+        <AddEditBudget
+          setAddEditModalDisplay={setAddEditModalDisplay}
+          budget={selectedBudget}
+        />
       )}
     </div>
   );

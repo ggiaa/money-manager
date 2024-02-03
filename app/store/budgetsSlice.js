@@ -8,6 +8,8 @@ import {
   updateDoc,
 } from "firebase/firestore";
 import { db } from "../config/firebase";
+import moment from "moment";
+import calculateBudget from "../services/budgeting/calculateBudget";
 
 export const budgetsSlice = (set, get) => ({
   budgets: [],
@@ -19,7 +21,17 @@ export const budgetsSlice = (set, get) => ({
       id: doc.id,
     }));
 
-    set({ budgets: filteredData });
+    const firstDate = moment().startOf("month").format("YYYY-MM-DD");
+    const endDate = moment().endOf("month").format("YYYY-MM-DD");
+
+    await get().getMonthlyTransactions(firstDate, endDate);
+
+    const transactions = get().monthlyTransactions;
+
+    // calculateBudget(filteredData, transactions);
+    // console.log(calculateBudget(filteredData, transactions));
+
+    set({ budgets: calculateBudget(filteredData, transactions) });
   },
   addBudgets: async (values, categories) => {
     const newBudget = {

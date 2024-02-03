@@ -12,6 +12,7 @@ import {
 } from "firebase/firestore";
 import { db } from "../config/firebase";
 import moment from "moment";
+import calculateBudget from "../services/budgeting/calculateBudget";
 
 export const transactionsSlice = (set, get) => ({
   transactions: [],
@@ -27,7 +28,7 @@ export const transactionsSlice = (set, get) => ({
 
     set({ transactions: filteredData });
   },
-  getMonthlyTransactions: async ({ startDate, endDate }) => {
+  getMonthlyTransactions: async (startDate, endDate) => {
     const q = query(
       collection(db, "transactions"),
       where("date", ">=", moment(startDate).toDate()),
@@ -68,10 +69,14 @@ export const transactionsSlice = (set, get) => ({
       return b.date - a.date;
     });
 
+    // console.log(calculateBudget(get().budgets, get().monthlyTransactions));
+    // set({ budgets: calculateBudget(get().budgets, get().monthlyTransactions) });
+
     set({ transactions: transactionsData });
 
     if (params.is_expense) {
       get().subtractBalance({ id: params.accountId, amount: params.amount });
+      get().getBudgets();
     } else if (params.is_income) {
       get().addBalance({ id: params.accountId, amount: params.amount });
     }

@@ -5,6 +5,7 @@ import {
   deleteDoc,
   doc,
   getDocs,
+  limit,
   orderBy,
   query,
   updateDoc,
@@ -17,6 +18,17 @@ import calculateBudget from "../services/budgeting/calculateBudget";
 export const transactionsSlice = (set, get) => ({
   transactions: [],
   monthlyTransactions: [],
+
+  latestTransactions: [], // 7 transaksi terakhir
+  currentWeekTransactions: [], //transaksi minggu ini
+  specificMonthTransactions: [], // transaksi untuk spesifik bulan tertentu
+  currentMonthExpenseTransactions: [],
+  currentMonthTotalIncome: 0, // total keseluruhan
+  currentMonthTotalExpense: 0, // total keseluruhan
+  currentMonthIncomeByCategory: [], // total berdasarkan kategori
+  currentMonthExpenseByCategory: [], // total berdasarkan kategori
+  fetched: false, //flag apakah datanya sudah di fetch atau belum
+
   getTransactions: async () => {
     const q = query(collection(db, "transactions"), orderBy("date", "desc"));
     const querySnapshot = await getDocs(q);
@@ -131,6 +143,117 @@ export const transactionsSlice = (set, get) => ({
 
     if (transaction.is_expense) {
       get().addBalance({ id: accountId, amount: amount });
+    }
+  },
+
+  fetchTransactions: async () => {
+    if (!get().fetched) {
+      const startDate = moment().startOf("month").toDate();
+      const endDate = moment().endOf("month").toDate();
+      const startWeek = moment().startOf("week").toDate();
+      const endWeek = moment().endOf("week").toDate();
+
+      const q = query(
+        collection(db, "transactions"),
+        where("date", ">=", startDate),
+        where("date", "<=", endDate),
+        orderBy("date", "desc")
+      );
+      const querySnapshotCurrentMonthTransactions = await getDocs(q);
+
+      let TempLatestTransactions = [];
+      let TempCurrentWeekTransactions = [];
+      let tempCurrentMonthExpenseTransactions = [];
+      let TempCurrentMonthTotalIncome = 0;
+      let TempCurrentMonthTotalExpense = 0;
+      let TempCurrentMonthIncomeByCategory = [];
+      let TempCurrentMonthExpenseByCategory = [];
+
+      // handle setting latest transactions
+      if (querySnapshotCurrentMonthTransactions.docs.length < 8) {
+        // get recent transactions
+        const latestQuery = query(
+          collection(db, "transactions"),
+          orderBy("date", "desc"),
+          limit(8)
+        );
+        const querySnapshotLatestTransactions = await getDocs(latestQuery);
+        TempLatestTransactions = querySnapshotLatestTransactions.docs.map(
+          (doc) => ({
+            ...doc.data(),
+            id: doc.id,
+            date: doc.data().date.toDate(),
+          })
+        );
+      } else {
+        TempLatestTransactions = querySnapshotCurrentMonthTransactions.docs
+          .slice(0, 8)
+          .map((doc) => ({
+            ...doc.data(),
+            id: doc.id,
+            date: doc.data().date.toDate(),
+          }));
+      }
+
+      // handle current week transactions
+      TempCurrentWeekTransactions = querySnapshotCurrentMonthTransactions.docs
+        .filter((item) => item.date >= startWeek && item.date <= endWeek)
+        .map((doc) => ({
+          ...doc.data(),
+          id: doc.id,
+          date: doc.data().date.toDate(),
+        }));
+
+      // handle current month total income expense and total amount of each category
+      querySnapshotCurrentMonthTransactions.docs.map((doc) => {
+        const data = {
+          ...doc.data(),
+          id: doc.id,
+          date: doc.data().date.toDate(),
+        };
+
+        if (data.is_income) {
+          TempCurrentMonthTotalIncome += data.amount;
+
+          const existingObject = TempCurrentMonthIncomeByCategory.find(
+            (obj) => obj.category == data.sub_category
+          );
+          if (existingObject) {
+            existingObject.amount += data.amount;
+          } else {
+            TempCurrentMonthExpenseByCategory.push({
+              category: data.sub_category,
+              amount: data.amount,
+            });
+          }
+        } else if (data.is_expense) {
+          TempCurrentMonthTotalExpense += data.amount;
+
+          const existingObject = TempCurrentMonthExpenseByCategory.find(
+            (obj) => obj.category == data.category
+          );
+          if (existingObject) {
+            existingObject.amount += data.amount;
+          } else {
+            TempCurrentMonthExpenseByCategory.push({
+              category: data.category,
+              amount: data.amount,
+            });
+          }
+
+          tempCurrentMonthExpenseTransactions.push(data);
+        }
+      });
+
+      set({
+        latestTransactions: TempLatestTransactions,
+        currentWeekTransactions: TempCurrentWeekTransactions,
+        currentMonthTotalIncome: TempCurrentMonthTotalIncome,
+        currentMonthTotalExpense: TempCurrentMonthTotalExpense,
+        currentMonthIncomeByCategory: TempCurrentMonthIncomeByCategory,
+        currentMonthExpenseByCategory: TempCurrentMonthExpenseByCategory,
+        currentMonthExpenseTransactions: tempCurrentMonthExpenseTransactions,
+      });
     }
   },
 });

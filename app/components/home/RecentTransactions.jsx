@@ -10,10 +10,7 @@ import AddEditTransaction from "../navbar/AddEditTransaction";
 
 function RecentTransactions() {
   const boundedStore = useStore(useBoundedStore);
-  const transactions = useBoundedStore((state) => state.transactions).slice(
-    0,
-    8
-  );
+  const transactions = useBoundedStore((state) => state.latestTransactions);
 
   const [modalOpen, setModalOpen] = useState(false);
   const [editedData, setEditedData] = useState("");

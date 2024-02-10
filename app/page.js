@@ -13,24 +13,12 @@ import { useBoundedStore } from "./store/boundedStore";
 
 export default function Home() {
   const boundedStore = useStore(useBoundedStore);
-
   const [displayedPie, setDisplayedPie] = useState("expense");
-  const [pieData, setPieData] = useState([]);
-  const expenseData = useBoundedStore(
-    (state) => state.currentMonthExpenseByCategory
-  ).map((val) => {
-    return { value: val.amount, name: val.category };
-  });
-  const incomeData = useBoundedStore(
-    (state) => state.currentMonthIncomeByCategory
-  ).map((val) => {
-    return { value: val.amount, name: val.category };
-  });
-
+  
+  const expenseData = useBoundedStore((state) => state.currentMonthExpenseByCategory);
+  const incomeData = useBoundedStore((state) => state.currentMonthIncomeByCategory);
   const totalIncome = useBoundedStore((state) => state.currentMonthTotalIncome);
-  const totalExpense = useBoundedStore(
-    (state) => state.currentMonthTotalExpense
-  );
+  const totalExpense = useBoundedStore((state) => state.currentMonthTotalExpense);
   const totalBalance = useBoundedStore((state) => state.totalBalance);
 
   const option = {
@@ -80,15 +68,7 @@ export default function Home() {
   };
 
   useEffect(() => {
-    let tempData = [];
-  }, [displayedPie]);
-
-  useEffect(() => {
     boundedStore.fetchTransactions();
-
-    // const myChart = echarts.init(document.getElementById("echart-container"));
-    // myChart.setOption(option);
-    // document.getElementById("category-pie").classList.remove("hidden");
   }, []);
 
   return (

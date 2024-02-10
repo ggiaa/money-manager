@@ -14,13 +14,15 @@ import {
 import { db } from "../config/firebase";
 import moment from "moment";
 import calculateBudget from "../services/budgeting/calculateBudget";
+import mappingTransactions from "../services/transactions/mappingTransactions";
 
 export const transactionsSlice = (set, get) => ({
-  transactions: [],
+  transactions: [], // general transactions
   monthlyTransactions: [],
 
+  // All item below will be mapping automatically
   latestTransactions: [], // 7 transaksi terakhir
-  currentWeekTransactions: [], //transaksi minggu ini
+  currentWeekTransactionsStatistic: {}, //transaksi minggu ini
   specificMonthTransactions: [], // transaksi untuk spesifik bulan tertentu
   currentMonthExpenseTransactions: [],
   currentMonthTotalIncome: 0, // total keseluruhan
@@ -153,109 +155,147 @@ export const transactionsSlice = (set, get) => ({
       const startWeek = moment().startOf("week").toDate();
       const endWeek = moment().endOf("week").toDate();
 
-      const q = query(
-        collection(db, "transactions"),
-        where("date", ">=", startDate),
-        where("date", "<=", endDate),
-        orderBy("date", "desc")
-      );
-      const querySnapshotCurrentMonthTransactions = await getDocs(q);
+      let querySnapshot = (
+        await getDocs(
+          query(
+            collection(db, "transactions"),
+            where("date", ">=", startDate),
+            where("date", "<=", endDate),
+            orderBy("date", "desc")
+          )
+        )
+      ).docs;
 
-      let TempLatestTransactions = [];
-      let TempCurrentWeekTransactions = [];
-      let tempCurrentMonthExpenseTransactions = [];
-      let TempCurrentMonthTotalIncome = 0;
-      let TempCurrentMonthTotalExpense = 0;
-      let TempCurrentMonthIncomeByCategory = [];
-      let TempCurrentMonthExpenseByCategory = [];
-
-      // handle setting latest transactions
-      if (querySnapshotCurrentMonthTransactions.docs.length < 8) {
-        // get recent transactions
+      if (querySnapshot.length < 8) {
         const latestQuery = query(
           collection(db, "transactions"),
           orderBy("date", "desc"),
           limit(8)
         );
-        const querySnapshotLatestTransactions = await getDocs(latestQuery);
-        TempLatestTransactions = querySnapshotLatestTransactions.docs.map(
-          (doc) => ({
-            ...doc.data(),
-            id: doc.id,
-            date: doc.data().date.toDate(),
-          })
-        );
+        querySnapshot = (await getDocs(latestQuery)).docs;
       } else {
-        TempLatestTransactions = querySnapshotCurrentMonthTransactions.docs
-          .slice(0, 8)
-          .map((doc) => ({
-            ...doc.data(),
-            id: doc.id,
-            date: doc.data().date.toDate(),
-          }));
       }
 
-      // handle current week transactions
-      TempCurrentWeekTransactions = querySnapshotCurrentMonthTransactions.docs
-        .filter((item) => item.date >= startWeek && item.date <= endWeek)
-        .map((doc) => ({
-          ...doc.data(),
-          id: doc.id,
-          date: doc.data().date.toDate(),
-        }));
+      const transactions = querySnapshot.map((doc) => ({
+        ...doc.data(),
+        id: doc.id,
+        date: doc.data().date.toDate(),
+      }));
 
-      // handle current month total income expense and total amount of each category
-      querySnapshotCurrentMonthTransactions.docs.map((doc) => {
-        const data = {
-          ...doc.data(),
-          id: doc.id,
-          date: doc.data().date.toDate(),
-        };
+      const mapping = mappingTransactions(transactions);
 
-        if (data.is_income) {
-          TempCurrentMonthTotalIncome += data.amount;
-
-          const existingObject = TempCurrentMonthIncomeByCategory.find(
-            (obj) => obj.category == data.sub_category
-          );
-          if (existingObject) {
-            existingObject.amount += data.amount;
-          } else {
-            TempCurrentMonthExpenseByCategory.push({
-              category: data.sub_category,
-              amount: data.amount,
-            });
-          }
-        } else if (data.is_expense) {
-          TempCurrentMonthTotalExpense += data.amount;
-
-          const existingObject = TempCurrentMonthExpenseByCategory.find(
-            (obj) => obj.category == data.category
-          );
-          if (existingObject) {
-            existingObject.amount += data.amount;
-          } else {
-            TempCurrentMonthExpenseByCategory.push({
-              category: data.category,
-              amount: data.amount,
-            });
-          }
-
-          tempCurrentMonthExpenseTransactions.push(data);
-        }
-      });
-
-      console.log(TempCurrentMonthTotalIncome);
-      console.log(TempCurrentMonthTotalExpense);
       set({
-        latestTransactions: TempLatestTransactions,
-        currentWeekTransactions: TempCurrentWeekTransactions,
-        currentMonthTotalIncome: TempCurrentMonthTotalIncome,
-        currentMonthTotalExpense: TempCurrentMonthTotalExpense,
-        currentMonthIncomeByCategory: TempCurrentMonthIncomeByCategory,
-        currentMonthExpenseByCategory: TempCurrentMonthExpenseByCategory,
-        currentMonthExpenseTransactions: tempCurrentMonthExpenseTransactions,
+        latestTransactions: mapping.latestTransactions,
+        currentWeekTransactionsStatistic:
+          mapping.currentWeekTransactionsStatistic,
+        specificMonthTransactions: mapping.specificMonthTransactions,
+        currentMonthExpenseTransactions:
+          mapping.currentMonthExpenseTransactions,
+        currentMonthTotalIncome: mapping.currentMonthTotalIncome,
+        currentMonthTotalExpense: mapping.currentMonthTotalExpense,
+        currentMonthIncomeByCategory: mapping.currentMonthIncomeByCategory,
+        currentMonthExpenseByCategory: mapping.currentMonthExpenseByCategory,
+        fetched: true,
       });
+
+      // console.log(mappingTransactions(transactions));
+      //
+
+      // let TempLatestTransactions = [];
+      // let TempCurrentWeekTransactions = [];
+      // let tempCurrentMonthExpenseTransactions = [];
+      // let TempCurrentMonthTotalIncome = 0;
+      // let TempCurrentMonthTotalExpense = 0;
+      // let TempCurrentMonthIncomeByCategory = [];
+      // let TempCurrentMonthExpenseByCategory = [];
+
+      // // untuk latest transaction, kalau hasil fetch transaksi bulan ini lebih dari delapan transaksi, maka gunakan itu. jika tidak, maka fetch 8 data transaksi terakhir
+      // if (querySnapshotCurrentMonthTransactions.docs.length < 8) {
+      //   // get recent transactions
+      //   const latestQuery = query(
+      //     collection(db, "transactions"),
+      //     orderBy("date", "desc"),
+      //     limit(8)
+      //   );
+      //   const querySnapshotLatestTransactions = await getDocs(latestQuery);
+      //   TempLatestTransactions = querySnapshotLatestTransactions.docs.map(
+      //     (doc) => ({
+      //       ...doc.data(),
+      //       id: doc.id,
+      //       date: doc.data().date.toDate(),
+      //     })
+      //   );
+      // } else {
+      //   TempLatestTransactions = querySnapshotCurrentMonthTransactions.docs
+      //     .slice(0, 8)
+      //     .map((doc) => ({
+      //       ...doc.data(),
+      //       id: doc.id,
+      //       date: doc.data().date.toDate(),
+      //     }));
+      // }
+
+      // // set current week data transactions
+      // TempCurrentWeekTransactions = querySnapshotCurrentMonthTransactions.docs
+      //   .filter((item) => item.date >= startWeek && item.date <= endWeek)
+      //   .map((doc) => ({
+      //     ...doc.data(),
+      //     id: doc.id,
+      //     date: doc.data().date.toDate(),
+      //   }));
+
+      // // set total expense dan income berdasarkan kategorinya
+      // // set total income dan expense keseluruhan
+      // // set expense selama bulan ini (digunakan untuk menghitung budget)
+      // querySnapshotCurrentMonthTransactions.docs.map((doc) => {
+      //   const data = {
+      //     ...doc.data(),
+      //     id: doc.id,
+      //     date: doc.data().date.toDate(),
+      //   };
+
+      //   if (data.is_income) {
+      //     TempCurrentMonthTotalIncome += data.amount;
+
+      //     const existingObject = TempCurrentMonthIncomeByCategory.find(
+      //       (obj) => obj.category == data.sub_category
+      //     );
+      //     if (existingObject) {
+      //       existingObject.amount += data.amount;
+      //     } else {
+      //       TempCurrentMonthExpenseByCategory.push({
+      //         category: data.sub_category,
+      //         amount: data.amount,
+      //       });
+      //     }
+      //   } else if (data.is_expense) {
+      //     TempCurrentMonthTotalExpense += data.amount;
+
+      //     const existingObject = TempCurrentMonthExpenseByCategory.find(
+      //       (obj) => obj.category == data.category
+      //     );
+      //     if (existingObject) {
+      //       existingObject.amount += data.amount;
+      //     } else {
+      //       TempCurrentMonthExpenseByCategory.push({
+      //         category: data.category,
+      //         amount: data.amount,
+      //       });
+      //     }
+
+      //     tempCurrentMonthExpenseTransactions.push(data);
+      //   }
+      // });
+
+      // set({
+      //   latestTransactions: TempLatestTransactions,
+      //   currentWeekTransactions: TempCurrentWeekTransactions,
+      //   currentMonthTotalIncome: TempCurrentMonthTotalIncome,
+      //   currentMonthTotalExpense: TempCurrentMonthTotalExpense,
+      //   currentMonthIncomeByCategory: TempCurrentMonthIncomeByCategory,
+      //   currentMonthExpenseByCategory: TempCurrentMonthExpenseByCategory,
+      //   currentMonthExpenseTransactions: tempCurrentMonthExpenseTransactions,
+      // });
     }
   },
 });

@@ -27,7 +27,11 @@ export default function Home() {
     return { value: val.amount, name: val.category };
   });
 
-  console.log(expenseData);
+  const totalIncome = useBoundedStore((state) => state.currentMonthTotalIncome);
+  const totalExpense = useBoundedStore(
+    (state) => state.currentMonthTotalExpense
+  );
+  const totalBalance = useBoundedStore((state) => state.totalBalance);
 
   const option = {
     tooltip: {
@@ -94,8 +98,15 @@ export default function Home() {
           <div className="col-span-3 flex justify-center items-center flex-col border border-l-0 border-y-0 border-r-2">
             <p className="mb-4">Current Balance</p>
             <div>
-              <span>Rp</span>
-              <span className="text-2xl font-semibold">10.525.500</span>
+              <span className="text-2xl font-semibold">
+                <NumericFormat
+                  value={totalBalance}
+                  displayType={"text"}
+                  thousandSeparator="."
+                  decimalSeparator=","
+                  prefix={"Rp"}
+                />
+              </span>
             </div>
           </div>
           <div className="grid col-span-2 grid-rows-2 divide-y-2 px-4">
@@ -105,7 +116,7 @@ export default function Home() {
                 <p className="">Income</p>
                 <p className="text-green-600 text-lg">
                   <NumericFormat
-                    value={2000000}
+                    value={totalIncome}
                     displayType={"text"}
                     thousandSeparator="."
                     decimalSeparator=","
@@ -120,7 +131,7 @@ export default function Home() {
                 <p>Expense</p>
                 <p className="text-red-600 text-lg">
                   <NumericFormat
-                    value={500000}
+                    value={totalExpense}
                     displayType={"text"}
                     thousandSeparator="."
                     decimalSeparator=","

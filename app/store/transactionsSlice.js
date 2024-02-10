@@ -245,6 +245,8 @@ export const transactionsSlice = (set, get) => ({
         }
       });
 
+      console.log(TempCurrentMonthTotalIncome);
+      console.log(TempCurrentMonthTotalExpense);
       set({
         latestTransactions: TempLatestTransactions,
         currentWeekTransactions: TempCurrentWeekTransactions,

@@ -57,7 +57,7 @@ function statistic() {
   });
 
   useEffect(() => {
-    boundedStore.getTransactions();
+    // boundedStore.getTransactions();
   }, []);
 
   return (

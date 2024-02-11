@@ -78,7 +78,10 @@ export const accountsSettingSlice = (set, get) => ({
       return account;
     });
 
-    set({ accounts: updatedAccounts });
+    set({
+      accounts: updatedAccounts,
+      totalBalance: (get().totalBalance -= parseInt(amount)),
+    });
   },
   addBalance: async ({ id, amount }) => {
     const updatedAccounts = await get().accounts.map((acc) => {
@@ -94,7 +97,10 @@ export const accountsSettingSlice = (set, get) => ({
       return account;
     });
 
-    set({ accounts: updatedAccounts });
+    set({
+      accounts: updatedAccounts,
+      totalBalance: (get().totalBalance += parseInt(amount)),
+    });
   },
   recalculateBalance: async (originalTransaction, editedTransaction) => {
     const allAccounts = get().accounts;

@@ -57,44 +57,44 @@ export const transactionsSlice = (set, get) => ({
 
     set({ monthlyTransactions: filteredData });
   },
-  addTransaction: async (params) => {
-    const newTransactionData = {
-      account: params.account,
-      account_id: params.accountId,
-      amount: parseInt(params.amount),
-      category: params.category1,
-      sub_category: params.category2,
-      date: new Date(params.date.startDate),
-      icon: params.icon,
-      is_expense: params.is_expense,
-      is_income: params.is_income,
-      note: params.note,
-    };
+  // addTransaction: async (params) => {
+  //   const newTransactionData = {
+  //     account: params.account,
+  //     account_id: params.accountId,
+  //     amount: parseInt(params.amount),
+  //     category: params.category1,
+  //     sub_category: params.category2,
+  //     date: new Date(params.date.startDate),
+  //     icon: params.icon,
+  //     is_expense: params.is_expense,
+  //     is_income: params.is_income,
+  //     note: params.note,
+  //   };
 
-    const docRef = await addDoc(
-      collection(db, "transactions"),
-      newTransactionData
-    );
+  //   const docRef = await addDoc(
+  //     collection(db, "transactions"),
+  //     newTransactionData
+  //   );
 
-    const transactionsData = [
-      ...get().transactions,
-      { ...newTransactionData, id: docRef.id },
-    ].sort((a, b) => {
-      return b.date - a.date;
-    });
+  //   const transactionsData = [
+  //     ...get().transactions,
+  //     { ...newTransactionData, id: docRef.id },
+  //   ].sort((a, b) => {
+  //     return b.date - a.date;
+  //   });
 
-    // console.log(calculateBudget(get().budgets, get().monthlyTransactions));
-    // set({ budgets: calculateBudget(get().budgets, get().monthlyTransactions) });
+  //   // console.log(calculateBudget(get().budgets, get().monthlyTransactions));
+  //   // set({ budgets: calculateBudget(get().budgets, get().monthlyTransactions) });
 
-    set({ transactions: transactionsData });
+  //   set({ transactions: transactionsData });
 
-    if (params.is_expense) {
-      get().subtractBalance({ id: params.accountId, amount: params.amount });
-      get().getBudgets();
-    } else if (params.is_income) {
-      get().addBalance({ id: params.accountId, amount: params.amount });
-    }
-  },
+  //   if (params.is_expense) {
+  //     get().subtractBalance({ id: params.accountId, amount: params.amount });
+  //     get().getBudgets();
+  //   } else if (params.is_income) {
+  //     get().addBalance({ id: params.accountId, amount: params.amount });
+  //   }
+  // },
   editTransaction: async (id, editedRecord) => {
     const originalTransaction = get().transactions.filter(
       (trans) => trans.id == id
@@ -151,16 +151,12 @@ export const transactionsSlice = (set, get) => ({
   fetchTransactions: async () => {
     if (!get().fetched) {
       const startDate = moment().startOf("month").toDate();
-      const endDate = moment().endOf("month").toDate();
-      const startWeek = moment().startOf("week").toDate();
-      const endWeek = moment().endOf("week").toDate();
 
       let querySnapshot = (
         await getDocs(
           query(
             collection(db, "transactions"),
             where("date", ">=", startDate),
-            where("date", "<=", endDate),
             orderBy("date", "desc")
           )
         )
@@ -185,6 +181,7 @@ export const transactionsSlice = (set, get) => ({
       const mapping = mappingTransactions(transactions);
 
       set({
+        transactions: transactions,
         latestTransactions: mapping.latestTransactions,
         currentWeekTransactionsStatistic:
           mapping.currentWeekTransactionsStatistic,
@@ -197,105 +194,48 @@ export const transactionsSlice = (set, get) => ({
         currentMonthExpenseByCategory: mapping.currentMonthExpenseByCategory,
         fetched: true,
       });
+    }
+  },
 
-      // console.log(mappingTransactions(transactions));
-      //
+  addTransaction: async (params) => {
+    const newTransactionData = {
+      account: params.account,
+      account_id: params.accountId,
+      amount: parseInt(params.amount),
+      category: params.category1,
+      sub_category: params.category2,
+      date: new Date(params.date.startDate),
+      icon: params.icon,
+      is_expense: params.is_expense,
+      is_income: params.is_income,
+      note: params.note,
+    };
 
-      // let TempLatestTransactions = [];
-      // let TempCurrentWeekTransactions = [];
-      // let tempCurrentMonthExpenseTransactions = [];
-      // let TempCurrentMonthTotalIncome = 0;
-      // let TempCurrentMonthTotalExpense = 0;
-      // let TempCurrentMonthIncomeByCategory = [];
-      // let TempCurrentMonthExpenseByCategory = [];
+    const docRef = await addDoc(
+      collection(db, "transactions"),
+      newTransactionData
+    );
 
-      // // untuk latest transaction, kalau hasil fetch transaksi bulan ini lebih dari delapan transaksi, maka gunakan itu. jika tidak, maka fetch 8 data transaksi terakhir
-      // if (querySnapshotCurrentMonthTransactions.docs.length < 8) {
-      //   // get recent transactions
-      //   const latestQuery = query(
-      //     collection(db, "transactions"),
-      //     orderBy("date", "desc"),
-      //     limit(8)
-      //   );
-      //   const querySnapshotLatestTransactions = await getDocs(latestQuery);
-      //   TempLatestTransactions = querySnapshotLatestTransactions.docs.map(
-      //     (doc) => ({
-      //       ...doc.data(),
-      //       id: doc.id,
-      //       date: doc.data().date.toDate(),
-      //     })
-      //   );
-      // } else {
-      //   TempLatestTransactions = querySnapshotCurrentMonthTransactions.docs
-      //     .slice(0, 8)
-      //     .map((doc) => ({
-      //       ...doc.data(),
-      //       id: doc.id,
-      //       date: doc.data().date.toDate(),
-      //     }));
-      // }
+    const transactions = [...get().transactions, { ...newTransactionData, id: docRef.id }];
+    
+    const mapping = mappingTransactions(transactions);
 
-      // // set current week data transactions
-      // TempCurrentWeekTransactions = querySnapshotCurrentMonthTransactions.docs
-      //   .filter((item) => item.date >= startWeek && item.date <= endWeek)
-      //   .map((doc) => ({
-      //     ...doc.data(),
-      //     id: doc.id,
-      //     date: doc.data().date.toDate(),
-      //   }));
+    set({
+      transactions: transactions,
+      latestTransactions: mapping.latestTransactions,
+      currentWeekTransactionsStatistic: mapping.currentWeekTransactionsStatistic,
+      specificMonthTransactions: mapping.specificMonthTransactions,
+      currentMonthExpenseTransactions: mapping.currentMonthExpenseTransactions,
+      currentMonthTotalIncome: mapping.currentMonthTotalIncome,
+      currentMonthTotalExpense: mapping.currentMonthTotalExpense,
+      currentMonthIncomeByCategory: mapping.currentMonthIncomeByCategory,
+      currentMonthExpenseByCategory: mapping.currentMonthExpenseByCategory,
+    });
 
-      // // set total expense dan income berdasarkan kategorinya
-      // // set total income dan expense keseluruhan
-      // // set expense selama bulan ini (digunakan untuk menghitung budget)
-      // querySnapshotCurrentMonthTransactions.docs.map((doc) => {
-      //   const data = {
-      //     ...doc.data(),
-      //     id: doc.id,
-      //     date: doc.data().date.toDate(),
-      //   };
-
-      //   if (data.is_income) {
-      //     TempCurrentMonthTotalIncome += data.amount;
-
-      //     const existingObject = TempCurrentMonthIncomeByCategory.find(
-      //       (obj) => obj.category == data.sub_category
-      //     );
-      //     if (existingObject) {
-      //       existingObject.amount += data.amount;
-      //     } else {
-      //       TempCurrentMonthExpenseByCategory.push({
-      //         category: data.sub_category,
-      //         amount: data.amount,
-      //       });
-      //     }
-      //   } else if (data.is_expense) {
-      //     TempCurrentMonthTotalExpense += data.amount;
-
-      //     const existingObject = TempCurrentMonthExpenseByCategory.find(
-      //       (obj) => obj.category == data.category
-      //     );
-      //     if (existingObject) {
-      //       existingObject.amount += data.amount;
-      //     } else {
-      //       TempCurrentMonthExpenseByCategory.push({
-      //         category: data.category,
-      //         amount: data.amount,
-      //       });
-      //     }
-
-      //     tempCurrentMonthExpenseTransactions.push(data);
-      //   }
-      // });
-
-      // set({
-      //   latestTransactions: TempLatestTransactions,
-      //   currentWeekTransactions: TempCurrentWeekTransactions,
-      //   currentMonthTotalIncome: TempCurrentMonthTotalIncome,
-      //   currentMonthTotalExpense: TempCurrentMonthTotalExpense,
-      //   currentMonthIncomeByCategory: TempCurrentMonthIncomeByCategory,
-      //   currentMonthExpenseByCategory: TempCurrentMonthExpenseByCategory,
-      //   currentMonthExpenseTransactions: tempCurrentMonthExpenseTransactions,
-      // });
+    if (newTransactionData.is_expense) {
+      get().subtractBalance({ id: params.accountId, amount: params.amount });
+    } else if (params.is_income) {
+      get().addBalance({ id: params.accountId, amount: params.amount });
     }
   },
 });

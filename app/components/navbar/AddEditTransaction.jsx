@@ -145,6 +145,11 @@ function AddEditTransaction({
       formik.setFieldValue("note", transactionData.note);
       formik.setFieldValue("is_income", transactionData.is_income);
       formik.setFieldValue("is_expense", transactionData.is_expense);
+    }else{
+      formik.setFieldValue("date", {
+        startDate: new Date(),
+        endDate: new Date(),
+      });
     }
   }, [modalOpen]);
 

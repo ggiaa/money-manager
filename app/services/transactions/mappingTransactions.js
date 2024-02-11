@@ -15,7 +15,7 @@ const mappingTransactions = (transactions) => {
   const sortedTransactions = transactions.sort((a, b) => b.date - a.date);
 
   // mapping latest transactions
-  latestTransactions = sortedTransactions.slice(0, 2);
+  latestTransactions = sortedTransactions.slice(0, 8);
 
   //mapping current week transactions
   const income = ["Income", 0, 0, 0, 0, 0, 0, 0];
@@ -42,34 +42,42 @@ const mappingTransactions = (transactions) => {
     currentWeekTransactionsStatistic = { income, expense };
 
   // mapping current month expense transactions, total income, total expense, total income for each category, total expense for each category
+  const startMonth = moment().startOf("month").toDate();
+  const endMonth = moment().endOf("month").toDate();
   sortedTransactions.map((transaction) => {
-    if (transaction.is_income) {
-      currentMonthTotalIncome += transaction.amount;
-
-      const existingObject = currentMonthIncomeByCategory.find((obj) => obj.name == transaction.sub_category);
-      if (existingObject) {
-        existingObject.value += transaction.amount;
-      } else {
-        currentMonthIncomeByCategory.push({
-            value: transaction.amount,
-            name: transaction.sub_category,
-        });
-      }
-    } else if (transaction.is_expense) {
-      currentMonthTotalExpense += transaction.amount;
-
-      const existingObject = currentMonthExpenseByCategory.find((obj) => obj.name == transaction.category);
-
-      if (existingObject) {
-        existingObject.value += transaction.amount;
-      } else {
-        currentMonthExpenseByCategory.push({
-            value: transaction.amount,
-            name: transaction.category,
-        });
-      }
-
-      currentMonthExpenseTransactions.push(transaction);
+    if (transaction.date >= startMonth && transaction.date <= endMonth){
+        if (transaction.is_income) {
+          currentMonthTotalIncome += transaction.amount;
+  
+          const existingObject = currentMonthIncomeByCategory.find(
+            (obj) => obj.name == transaction.sub_category
+          );
+          if (existingObject) {
+            existingObject.value += transaction.amount;
+          } else {
+            currentMonthIncomeByCategory.push({
+              value: transaction.amount,
+              name: transaction.sub_category,
+            });
+          }
+        } else if (transaction.is_expense) {
+          currentMonthTotalExpense += transaction.amount;
+  
+          const existingObject = currentMonthExpenseByCategory.find(
+            (obj) => obj.name == transaction.category
+          );
+  
+          if (existingObject) {
+            existingObject.value += transaction.amount;
+          } else {
+            currentMonthExpenseByCategory.push({
+              value: transaction.amount,
+              name: transaction.category,
+            });
+          }
+  
+          currentMonthExpenseTransactions.push(transaction);
+        }
     }
   });
 

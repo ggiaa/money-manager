@@ -25,7 +25,7 @@ function RecentTransactions() {
   };
 
   useEffect(() => {
-    boundedStore.getTransactions();
+    // boundedStore.getTransactions();
   }, []);
 
   return (

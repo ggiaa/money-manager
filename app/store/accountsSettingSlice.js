@@ -169,6 +169,23 @@ export const accountsSettingSlice = (set, get) => ({
       });
     }
 
-    set({ accounts: allAccounts });
+    // calculateTotalBalance
+    let newTotalBalance = get().totalBalance;
+    
+    // kembalikan total balance ke awal
+    if(originalTransaction.is_income){
+      newTotalBalance -= originalTransAmount
+    }else if (originalTransaction.is_expense){
+      newTotalBalance += originalTransAmount
+    }
+    
+    // update total balance dengan amount transaksi yang baru diedit
+    if (editedTransaction.is_income){
+      newTotalBalance += editTransAmount;
+    }else if (editedTransaction.is_income) {
+      newTotalBalance -= editTransAmount;
+    }
+    
+    set({ accounts: allAccounts, totalBalance: newTotalBalance });
   },
 });

@@ -57,6 +57,7 @@ export const transactionsSlice = (set, get) => ({
 
     set({ monthlyTransactions: filteredData });
   },
+
   // addTransaction: async (params) => {
   //   const newTransactionData = {
   //     account: params.account,
@@ -95,40 +96,42 @@ export const transactionsSlice = (set, get) => ({
   //     get().addBalance({ id: params.accountId, amount: params.amount });
   //   }
   // },
-  editTransaction: async (id, editedRecord) => {
-    const originalTransaction = get().transactions.filter(
-      (trans) => trans.id == id
-    );
 
-    const editedTransaction = {
-      account: editedRecord.account,
-      account_id: editedRecord.accountId,
-      amount: parseInt(editedRecord.amount),
-      category: editedRecord.category1,
-      sub_category: editedRecord.category2,
-      date: new Date(editedRecord.date.startDate),
-      icon: editedRecord.icon,
-      is_expense: editedRecord.is_expense,
-      is_income: editedRecord.is_income,
-      note: editedRecord.note,
-    };
+  // editTransaction: async (id, editedRecord) => {
+  //   const originalTransaction = get().transactions.filter(
+  //     (trans) => trans.id == id
+  //   );
 
-    await updateDoc(doc(db, "transactions", id), editedTransaction);
+  //   const editedTransaction = {
+  //     account: editedRecord.account,
+  //     account_id: editedRecord.accountId,
+  //     amount: parseInt(editedRecord.amount),
+  //     category: editedRecord.category1,
+  //     sub_category: editedRecord.category2,
+  //     date: new Date(editedRecord.date.startDate),
+  //     icon: editedRecord.icon,
+  //     is_expense: editedRecord.is_expense,
+  //     is_income: editedRecord.is_income,
+  //     note: editedRecord.note,
+  //   };
 
-    const transactionsData = get()
-      .transactions.map((transaction) =>
-        transaction.id == id ? { ...editedTransaction, id: id } : transaction
-      )
-      .sort((a, b) => {
-        return b.date - a.date;
-      });
+  //   await updateDoc(doc(db, "transactions", id), editedTransaction);
 
-    set({ transactions: transactionsData });
+  //   const transactionsData = get()
+  //     .transactions.map((transaction) =>
+  //       transaction.id == id ? { ...editedTransaction, id: id } : transaction
+  //     )
+  //     .sort((a, b) => {
+  //       return b.date - a.date;
+  //     });
 
-    if (editedTransaction.is_income || editedTransaction.is_expense) {
-      get().recalculateBalance(originalTransaction[0], editedTransaction);
-    }
-  },
+  //   set({ transactions: transactionsData });
+
+  //   if (editedTransaction.is_income || editedTransaction.is_expense) {
+  //     get().recalculateBalance(originalTransaction[0], editedTransaction);
+  //   }
+  // },
+
   deleteTransaction: async (transaction) => {
     const accountId = transaction.account_id;
     const amount = transaction.amount;
@@ -216,14 +219,18 @@ export const transactionsSlice = (set, get) => ({
       newTransactionData
     );
 
-    const transactions = [...get().transactions, { ...newTransactionData, id: docRef.id }];
-    
+    const transactions = [
+      ...get().transactions,
+      { ...newTransactionData, id: docRef.id },
+    ];
+
     const mapping = mappingTransactions(transactions);
 
     set({
       transactions: transactions,
       latestTransactions: mapping.latestTransactions,
-      currentWeekTransactionsStatistic: mapping.currentWeekTransactionsStatistic,
+      currentWeekTransactionsStatistic:
+        mapping.currentWeekTransactionsStatistic,
       specificMonthTransactions: mapping.specificMonthTransactions,
       currentMonthExpenseTransactions: mapping.currentMonthExpenseTransactions,
       currentMonthTotalIncome: mapping.currentMonthTotalIncome,
@@ -236,6 +243,51 @@ export const transactionsSlice = (set, get) => ({
       get().subtractBalance({ id: params.accountId, amount: params.amount });
     } else if (params.is_income) {
       get().addBalance({ id: params.accountId, amount: params.amount });
+    }
+  },
+
+  editTransaction: async (id, editedRecord) => {
+    const originalTransaction = get().transactions.filter(
+      (trans) => trans.id == id
+    );
+
+    const editedTransaction = {
+      account: editedRecord.account,
+      account_id: editedRecord.accountId,
+      amount: parseInt(editedRecord.amount),
+      category: editedRecord.category1,
+      sub_category: editedRecord.category2,
+      date: new Date(editedRecord.date.startDate),
+      icon: editedRecord.icon,
+      is_expense: editedRecord.is_expense,
+      is_income: editedRecord.is_income,
+      note: editedRecord.note,
+    };
+
+    await updateDoc(doc(db, "transactions", id), editedTransaction);
+
+    const transactions = get()
+      .transactions.map((transaction) =>
+        transaction.id == id ? { ...editedTransaction, id: id } : transaction
+    )
+
+    const mapping = mappingTransactions(transactions);
+
+    set({
+      transactions: transactions,
+      latestTransactions: mapping.latestTransactions,
+      currentWeekTransactionsStatistic:
+        mapping.currentWeekTransactionsStatistic,
+      specificMonthTransactions: mapping.specificMonthTransactions,
+      currentMonthExpenseTransactions: mapping.currentMonthExpenseTransactions,
+      currentMonthTotalIncome: mapping.currentMonthTotalIncome,
+      currentMonthTotalExpense: mapping.currentMonthTotalExpense,
+      currentMonthIncomeByCategory: mapping.currentMonthIncomeByCategory,
+      currentMonthExpenseByCategory: mapping.currentMonthExpenseByCategory,
+    });
+
+    if (editedTransaction.is_income || editedTransaction.is_expense) {
+      get().recalculateBalance(originalTransaction[0], editedTransaction);
     }
   },
 });

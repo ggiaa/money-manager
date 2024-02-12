@@ -136,11 +136,24 @@ export const transactionsSlice = (set, get) => ({
     const accountId = transaction.account_id;
     const amount = transaction.amount;
     await deleteDoc(doc(db, "transactions", transaction.id));
-    const updatedTransactions = get().transactions.filter(
+
+    const transactions = get().transactions.filter(
       (trans) => trans.id !== transaction.id
     );
 
-    set({ transactions: updatedTransactions });
+    const mapping = mappingTransactions(transactions);
+
+    set({
+      transactions: transactions,
+      latestTransactions: mapping.latestTransactions,
+      currentWeekTransactionsStatistic: mapping.currentWeekTransactionsStatistic,
+      specificMonthTransactions: mapping.specificMonthTransactions,
+      currentMonthExpenseTransactions: mapping.currentMonthExpenseTransactions,
+      currentMonthTotalIncome: mapping.currentMonthTotalIncome,
+      currentMonthTotalExpense: mapping.currentMonthTotalExpense,
+      currentMonthIncomeByCategory: mapping.currentMonthIncomeByCategory,
+      currentMonthExpenseByCategory: mapping.currentMonthExpenseByCategory,
+    });
 
     if (transaction.is_income) {
       get().subtractBalance({ id: accountId, amount: amount });

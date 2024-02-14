@@ -28,7 +28,7 @@ function statistic() {
     boundedStore.deleteTransaction(transactionData);
   };
 
-  console.log(transactions);
+  // console.log(transactions);
 
   useEffect(() => {
     if(calendarStart && calendarEnd){

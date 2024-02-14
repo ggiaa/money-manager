@@ -15,7 +15,7 @@ import { db } from "../config/firebase";
 import moment from "moment";
 import calculateBudget from "../services/budgeting/calculateBudget";
 import mappingTransactions from "../services/transactions/mappingTransactions";
-import { transactionsByMonthDeleteAction } from "../services/transactions/handleSpecificMonthTransactions";
+import { transactionsByMonthAddAction, transactionsByMonthDeleteAction } from "../services/transactions/handleSpecificMonthTransactions";
 
 export const transactionsSlice = (set, get) => ({
   transactions: [], // general transactions
@@ -162,12 +162,13 @@ export const transactionsSlice = (set, get) => ({
     ];
 
     const mapping = mappingTransactions(transactions);
+    const transactionsByMonth = transactionsByMonthAddAction(get().transactionsByMonth, { ...newTransactionData, id: docRef.id });
 
     set({
       transactions: transactions,
+      transactionsByMonth : transactionsByMonth,
       latestTransactions: mapping.latestTransactions,
-      currentWeekTransactionsStatistic:
-        mapping.currentWeekTransactionsStatistic,
+      currentWeekTransactionsStatistic: mapping.currentWeekTransactionsStatistic,
       specificMonthTransactions: mapping.specificMonthTransactions,
       currentMonthExpenseTransactions: mapping.currentMonthExpenseTransactions,
       currentMonthTotalIncome: mapping.currentMonthTotalIncome,

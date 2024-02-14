@@ -56,7 +56,7 @@ function Calendar({
     return days;
   };
 
-  console.log(transactionsAmount);
+  // console.log(transactionsAmount);
   useEffect(() => {
     const data = generateCalendarData(currentMonth);
     setCalendarData(data);

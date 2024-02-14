@@ -1,11 +1,55 @@
 import moment from "moment";
 
 const transactionsByMonthDeleteAction = (transactions, transaction) => {
+  return removeTransaction(transactions, transaction);
+};
+
+const transactionsByMonthAddAction = (transactions, transaction) => {
+  return addTransaction(transactions, transaction);
+};
+
+const addTransaction = (transactions, transaction) => {
   let transactionsObject =
     transactions[moment(transaction.date).format("YYYYMM") + "01"];
 
   if (!transactionsObject) {
-    return;
+    return transactions;
+  }
+
+  transactionsObject.transactions.push(transaction);
+
+  //get transactionsObject.transactionsAmount that have date as same as the deleted transaction date, then update the income/expense value
+  const transactionAmountItem =
+    transactionsObject &&
+    Object.values(transactionsObject.transactionsAmount).find(
+      (item) => item.date == moment(transaction.date).format("YYYY-MM-DD")
+    );
+
+  if (transactionAmountItem) {
+    if (transaction.is_income) {
+        transactionAmountItem.income += transaction.amount;
+    } else if (transaction.is_expense) {
+        transactionAmountItem.expense += transaction.amount;
+    }
+  } else {
+    transactionsObject.transactionsAmount.push({
+      date: moment(transaction.date).format("YYYY-MM-DD"),
+      income: transaction.is_income ? transaction.amount : 0,
+      expense: transaction.is_expense ? transaction.amount : 0,
+    });
+  }
+
+  transactions[moment(transaction.date).format("YYYYMM") + "01"] = transactionsObject;
+
+  return transactions;
+};
+
+const removeTransaction = (transactions, transaction) => {
+  let transactionsObject =
+    transactions[moment(transaction.date).format("YYYYMM") + "01"];
+
+  if (!transactionsObject) {
+    return transactions;
   }
 
   // remove delete transaction from transactionsObject.transactions
@@ -26,9 +70,10 @@ const transactionsByMonthDeleteAction = (transactions, transaction) => {
     transactionAmountItem.expense -= transaction.amount;
   }
 
-  transactions[moment(transaction.date).format("YYYYMM") + "01"] = transactionsObject;
+  transactions[moment(transaction.date).format("YYYYMM") + "01"] =
+    transactionsObject;
 
   return transactions;
 };
 
-export { transactionsByMonthDeleteAction };
+export { transactionsByMonthDeleteAction, transactionsByMonthAddAction };

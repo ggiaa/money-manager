@@ -13,12 +13,11 @@ function statistic() {
   const boundedStore = useStore(useBoundedStore);
   const [calendarStart, setCalendarStart] = useState();
   const [calendarEnd, setCalendarEnd] = useState();
-  const [selectedDate, setSelectedDate] = useState(
-    moment().format("YYYY-MM-DD")
-  );
-
+  const [selectedDate, setSelectedDate] = useState(moment().format("YYYY-MM-DD"));
   const [modalOpen, setModalOpen] = useState(false);
   const [editedData, setEditedData] = useState("");
+
+  const transactions = useBoundedStore((state) => state.transactionsByMonth);
 
   const handleEditTransaction = (transactionData) => {
     setModalOpen(true);
@@ -29,43 +28,21 @@ function statistic() {
     boundedStore.deleteTransaction(transactionData);
   };
 
-  const transactions = useBoundedStore((state) => state.transactions).filter(
-    (transaction) =>
-      transaction.date >= moment(calendarStart).toDate() &&
-      transaction.date <= moment(calendarEnd).toDate()
-  );
-
-  const transactionsAmount = [];
-  transactions.forEach((transaction) => {
-    const existingItem = transactionsAmount.find(
-      (i) => i.date == moment(transaction.date).format("YYYY-MM-DD")
-    );
-
-    if (existingItem) {
-      if (transaction.is_income) {
-        existingItem.income += transaction.amount;
-      } else if (transaction.is_expense) {
-        existingItem.expense += transaction.amount;
-      }
-    } else {
-      transactionsAmount.push({
-        date: moment(transaction.date).format("YYYY-MM-DD"),
-        income: transaction.is_income ? transaction.amount : 0,
-        expense: transaction.is_expense ? transaction.amount : 0,
-      });
-    }
-  });
+  console.log(transactions);
 
   useEffect(() => {
-    // boundedStore.getTransactions();
-  }, []);
+    if(calendarStart && calendarEnd){
+      boundedStore.getSpecificMonthTransactions(calendarStart, calendarEnd);
+    }
+  }, [calendarStart]);
 
   return (
     <div className="w-full h-full grid grid-cols-10 gap-x-2">
       <div className="col-span-7 bg-white rounded-lg p-4 flex flex-col shadow-lg">
         <Calendar
-          transactions={transactions}
-          transactionsAmount={transactionsAmount}
+          transactionsAmount={
+            transactions[calendarStart?.format("YYYYMMDD")]?.transactionsAmount
+          }
           setCalendarStart={setCalendarStart}
           setCalendarEnd={setCalendarEnd}
           selectedDate={selectedDate}
@@ -74,15 +51,15 @@ function statistic() {
       </div>
       <div className="col-span-3">
         <div className="text-sm bg-white shadow-lg p-4 flex flex-col rounded-lg h-full divide-y overflow-auto">
-          {transactions
+          {transactions[calendarStart?.format("YYYYMMDD")]?.transactions
             .filter(
-              (transactions) =>
-                moment(transactions.date).format("YYYY-MM-DD") == selectedDate
+              (transaction) =>
+                moment(transaction.date).format("YYYY-MM-DD") == selectedDate
             )
-            .map((transaction, i) => (
+            .map((transaction, index) => (
               <div
                 className="grid grid-cols-12 text-sm hover:bg-slate-100 my-1"
-                key={i}
+                key={index}
               >
                 <div className="col-span-8 py-2">
                   <div className="items-center flex w-full gap-x-1">

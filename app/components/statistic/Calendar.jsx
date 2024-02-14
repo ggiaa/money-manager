@@ -2,142 +2,65 @@
 import moment from "moment";
 import React, { useEffect, useState } from "react";
 import { NumericFormat } from "react-number-format";
+import CalendarTotalIncomeExpense from "./CalendarTotalIncomeExpense";
 
 function Calendar({
-  transactions,
   transactionsAmount,
   setCalendarStart,
   setCalendarEnd,
   selectedDate,
   setSelectedDate,
 }) {
-  // all dates to be displayed
-  const [dates, setDates] = useState([]);
-  const [actualMonth, setActualMonth] = useState(new Date().getMonth());
-  const [actualYear, setActualYear] = useState(new Date().getFullYear());
+  const [currentMonth, setCurrentMonth] = useState(moment());
+  const [calendarData, setCalendarData] = useState([]);
 
-  const getDate = () => {
-    setDates([]);
-    const arr = [];
-    const prevYear = actualMonth == 0 ? actualYear - 1 : actualYear;
-    const nextYear = actualMonth == 11 ? actualYear + 1 : actualYear;
-    const previousMonth = actualMonth - 1;
-    const nextMonth = actualMonth + 1;
+  const generateCalendarData = (month) => {
+    const daysInMonth = month.daysInMonth();
+    const dayOfWeek = month.startOf("month").format("d"); // Day of week (0-6) for the 1st
+    const previousMonthDays = dayOfWeek > 0 ? dayOfWeek : 7 - dayOfWeek; // Empty boxes at the beginning
 
-    let firstDateOfMonth = new Date(actualYear, actualMonth, 0).getDay();
+    const days = [];
 
-    let lastDateOfMonth = new Date(actualYear, nextMonth, 0).getDate();
-    let lastDayOfMonth = new Date(
-      actualYear,
-      actualMonth,
-      lastDateOfMonth
-    ).getDay();
-    let lastDateOfPreviousMonth = new Date(
-      actualYear,
-      actualMonth,
-      0
-    ).getDate();
-
-    let startdate = 1;
-    let startmonth = actualMonth;
-    let startyear = actualYear;
-    let enddate = lastDateOfMonth;
-    let endmonth = actualMonth;
-    let endyear = actualYear;
-
-    if (firstDateOfMonth !== 6) {
-      startdate = lastDateOfPreviousMonth - firstDateOfMonth;
-      startmonth = actualMonth - 1;
-    }
-
-    if (lastDayOfMonth !== 6) {
-      enddate = 6 - lastDayOfMonth;
-      endmonth = actualMonth + 1 > 11 ? 0 : actualMonth + 1;
-    }
-
-    setCalendarStart(
-      moment(
-        moment().set({ Year: actualYear, month: startmonth, date: startdate })
-      ).format("YYYY-MM-DD")
-    );
-    setCalendarEnd(
-      moment(
-        moment().set({ Year: nextYear, month: endmonth, date: enddate })
-      ).format("YYYY-MM-DD")
-    );
-
-    if (firstDateOfMonth < 6) {
-      for (
-        let i = lastDateOfPreviousMonth - firstDateOfMonth;
-        i <= lastDateOfPreviousMonth;
-        i++
-      ) {
-        const date = moment(
-          moment().set({ Year: prevYear, month: previousMonth, date: i })
-        ).format("YYYY-MM-DD");
-
-        if (i == lastDateOfPreviousMonth - firstDateOfMonth) {
-          setCalendarStart(date);
-        }
-        const foundItem = transactionsAmount.find((item) => item.date == date);
-        arr.push({
-          day: date,
-          income: foundItem ? foundItem.income : 0,
-          expense: foundItem ? foundItem.expense : 0,
+    // Fill empty boxes from previous month
+    if(previousMonthDays != 7){
+      for (let i = 0; i < previousMonthDays; i++) {
+        days.push({
+          date: month.clone().subtract("days", previousMonthDays - i),
+          isCurrentMonth: false,
         });
       }
     }
 
-    for (let i = 1; i <= lastDateOfMonth; i++) {
-      const date = moment(
-        moment().set({ Year: actualYear, month: actualMonth, date: i })
-      ).format("YYYY-MM-DD");
-
-      const foundItem = transactionsAmount.find((item) => item.date == date);
-      arr.push({
-        day: date,
-        income: foundItem ? foundItem.income : 0,
-        expense: foundItem ? foundItem.expense : 0,
+    setCalendarStart(month.clone().add("days", 0));
+    // Fill actual days of the month
+    for (let i = 0; i < daysInMonth; i++) {
+      days.push({
+        date: month.clone().add("days", i),
+        isCurrentMonth: true,
       });
     }
 
-    for (let i = 1; i < 7 - lastDayOfMonth; i++) {
-      const date = moment(
-        moment().set({ Year: nextYear, month: nextMonth, date: i })
-      ).format("YYYY-MM-DD");
+    setCalendarEnd(days[days.length - 1].date);
 
-      const foundItem = transactionsAmount.find((item) => item.date == date);
-      arr.push({
-        day: date,
-        income: foundItem ? foundItem.income : 0,
-        expense: foundItem ? foundItem.expense : 0,
-      });
+    // Fill empty boxes for next month if needed
+    const remainingBoxes = 7 - (days.length % 7);
+      if (remainingBoxes != 7 && remainingBoxes > 0) {
+        for (let i = 0; i < remainingBoxes; i++) {
+          days.push({
+          date: month.clone().add("days", days.length - (previousMonthDays == 7 ? 0 : previousMonthDays)),
+          isCurrentMonth: false,
+        });
+      }
     }
 
-    setDates(arr);
+    return days;
   };
 
-  const changeToPreviousMonth = () => {
-    if (actualMonth - 1 < 0) {
-      setActualMonth(11);
-      setActualYear(actualYear - 1);
-    } else {
-      setActualMonth(actualMonth - 1);
-    }
-  };
-
-  const changeToNextMonth = () => {
-    if (actualMonth + 1 > 11) {
-      setActualMonth(0);
-      setActualYear(actualYear + 1);
-    } else {
-      setActualMonth(actualMonth + 1);
-    }
-  };
-
+  console.log(transactionsAmount);
   useEffect(() => {
-    getDate();
-  }, [actualMonth, actualYear, transactions]);
+    const data = generateCalendarData(currentMonth);
+    setCalendarData(data);
+  }, [currentMonth]);
 
   return (
     <div>
@@ -145,13 +68,23 @@ function Calendar({
         <div>
           <div className="flex justify-between">
             <p className="text-left font-semibold mb-2 text-lg">
-              {moment()
-                .set({ Year: actualYear, month: actualMonth, date: 1 })
-                .format("MMMM YYYY")}
+              {currentMonth.format("MMMM YYYY")}
             </p>
             <div className="flex gap-x-4 cursor-pointer">
-              <div onClick={changeToPreviousMonth}>Previous</div>
-              <div onClick={changeToNextMonth}>Next</div>
+              <div
+                onClick={() =>
+                  setCurrentMonth(currentMonth.clone().subtract(1, "months"))
+                }
+              >
+                Previous
+              </div>
+              <div
+                onClick={() =>
+                  setCurrentMonth(currentMonth.clone().add(1, "months"))
+                }
+              >
+                Next
+              </div>
             </div>
           </div>
 
@@ -180,44 +113,32 @@ function Calendar({
           </div>
 
           <div className="border border-t-[1px] border-l-[1px] flex flex-wrap">
-            {dates.map((date) => (
+            {calendarData.map((day, index) => (
               <div
-                key={date.day}
-                className={`${date.day == selectedDate ? "bg-blue-200" : ""} ${
-                  moment(date.day).get("month") == actualMonth
-                    ? "text-black"
-                    : "text-slate-400 bg-slate-50"
-                }border-r-[1px] border-b-[1px] border w-[calc(100%/7)] h-[4.9rem] cursor-pointer flex flex-col`}
-                onClick={() => setSelectedDate(date.day)}
+                key={index}
+                className={`${
+                  day.date.format("YYYY-MM-DD") == selectedDate
+                    ? "bg-blue-200"
+                    : ""
+                } ${
+                  day.isCurrentMonth ? "text-black" : "text-slate-400 bg-slate-100"
+                } border-r-[1px] border-b-[1px] border w-[calc(100%/7)] h-[4.9rem] cursor-pointer flex flex-col`}
+                onClick={() => setSelectedDate(day.date.format("YYYY-MM-DD"))}
               >
-                <div className="flex-1">
-                  <p>{moment(date.day).format("DD")}</p>
-                </div>
+                {day.isCurrentMonth && 
+                <>
+                  <div className="flex-1">
+                    <p>{day.date.format("YYYY-MM-DD")}</p>
+                  </div>
 
-                <div className="text-xs px-1 text-right">
-                  {date.income > 0 && (
-                    <p className="text-green-500">
-                      <NumericFormat
-                        value={date.income}
-                        displayType={"text"}
-                        thousandSeparator="."
-                        decimalSeparator=","
-                        prefix={"Rp"}
-                      />
-                    </p>
-                  )}
-                  {date.expense > 0 && (
-                    <p className="text-red-500">
-                      <NumericFormat
-                        value={date.expense}
-                        displayType={"text"}
-                        thousandSeparator="."
-                        decimalSeparator=","
-                        prefix={"Rp"}
-                      />
-                    </p>
-                  )}
-                </div>
+                  <div className="text-xs px-1 text-right">
+                    <CalendarTotalIncomeExpense
+                      transactionsAmount={transactionsAmount}
+                      day={day.date.format("YYYY-MM-DD")}
+                    />
+                  </div>
+                </>
+                }
               </div>
             ))}
           </div>

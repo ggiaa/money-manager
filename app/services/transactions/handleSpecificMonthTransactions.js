@@ -1,0 +1,34 @@
+import moment from "moment";
+
+const transactionsByMonthDeleteAction = (transactions, transaction) => {
+  let transactionsObject =
+    transactions[moment(transaction.date).format("YYYYMM") + "01"];
+
+  if (!transactionsObject) {
+    return;
+  }
+
+  // remove delete transaction from transactionsObject.transactions
+  transactionsObject.transactions = transactionsObject.transactions.filter(
+    (item) => item.id !== transaction.id
+  );
+
+  //get transactionsObject.transactionsAmount that have date as same as the deleted transaction date, then update the income/expense value
+  const transactionAmountItem =
+    transactionsObject &&
+    Object.values(transactionsObject.transactionsAmount).find(
+      (item) => item.date == moment(transaction.date).format("YYYY-MM-DD")
+    );
+
+  if (transaction.is_income) {
+    transactionAmountItem.income -= transaction.amount;
+  } else if (transaction.is_expense) {
+    transactionAmountItem.expense -= transaction.amount;
+  }
+
+  transactions[moment(transaction.date).format("YYYYMM") + "01"] = transactionsObject;
+
+  return transactions;
+};
+
+export { transactionsByMonthDeleteAction };

@@ -4,6 +4,7 @@ import {
   collection,
   deleteDoc,
   doc,
+  getDoc,
   getDocs,
   limit,
   orderBy,
@@ -15,7 +16,7 @@ import { db } from "../config/firebase";
 import moment from "moment";
 import calculateBudget from "../services/budgeting/calculateBudget";
 import mappingTransactions from "../services/transactions/mappingTransactions";
-import { transactionsByMonthAddAction, transactionsByMonthDeleteAction } from "../services/transactions/handleSpecificMonthTransactions";
+import { transactionsByMonthAddAction, transactionsByMonthDeleteAction, transactionsByMonthEditAction } from "../services/transactions/handleSpecificMonthTransactions";
 
 export const transactionsSlice = (set, get) => ({
   transactions: [], // general transactions
@@ -185,7 +186,7 @@ export const transactionsSlice = (set, get) => ({
   },
 
   editTransaction: async (id, editedRecord) => {
-    const originalTransaction = get().transactions.filter(
+    let originalTransaction = get().transactions.filter(
       (trans) => trans.id == id
     );
 
@@ -202,6 +203,14 @@ export const transactionsSlice = (set, get) => ({
       note: editedRecord.note,
     };
 
+    if(!originalTransaction.length){
+      const docRef = doc(db, "transactions", id);
+      const docSnap = await getDoc(docRef);
+      originalTransaction = [
+        { ...docSnap.data(), date: docSnap.data().date.toDate(), id: docSnap.id },
+      ];
+    }
+
     await updateDoc(doc(db, "transactions", id), editedTransaction);
 
     const transactions = get().transactions.map((transaction) =>
@@ -209,12 +218,13 @@ export const transactionsSlice = (set, get) => ({
     );
 
     const mapping = mappingTransactions(transactions);
+    const transactionsByMonth = transactionsByMonthEditAction(get().transactionsByMonth, originalTransaction[0], { ...editedTransaction, id: id });
 
     set({
       transactions: transactions,
+      transactionsByMonth: transactionsByMonth,
       latestTransactions: mapping.latestTransactions,
-      currentWeekTransactionsStatistic:
-        mapping.currentWeekTransactionsStatistic,
+      currentWeekTransactionsStatistic: mapping.currentWeekTransactionsStatistic,
       specificMonthTransactions: mapping.specificMonthTransactions,
       currentMonthExpenseTransactions: mapping.currentMonthExpenseTransactions,
       currentMonthTotalIncome: mapping.currentMonthTotalIncome,

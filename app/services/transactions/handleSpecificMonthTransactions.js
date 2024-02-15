@@ -8,6 +8,11 @@ const transactionsByMonthAddAction = (transactions, transaction) => {
   return addTransaction(transactions, transaction);
 };
 
+const transactionsByMonthEditAction = (transactions, originalTransaction, editedTransaction) => {
+    const updateTransaction = removeTransaction(transactions, originalTransaction);
+  return addTransaction(updateTransaction, editedTransaction);
+};
+
 const addTransaction = (transactions, transaction) => {
   let transactionsObject =
     transactions[moment(transaction.date).format("YYYYMM") + "01"];
@@ -76,4 +81,8 @@ const removeTransaction = (transactions, transaction) => {
   return transactions;
 };
 
-export { transactionsByMonthDeleteAction, transactionsByMonthAddAction };
+export {
+  transactionsByMonthDeleteAction,
+  transactionsByMonthAddAction,
+  transactionsByMonthEditAction,
+};

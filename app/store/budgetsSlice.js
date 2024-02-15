@@ -24,14 +24,13 @@ export const budgetsSlice = (set, get) => ({
     const firstDate = moment().startOf("month").format("YYYY-MM-DD");
     const endDate = moment().endOf("month").format("YYYY-MM-DD");
 
-    await get().getMonthlyTransactions(firstDate, endDate);
+    const transactions = get().transactionsByMonth;
 
-    const transactions = get().monthlyTransactions;
+    if (!transactions[moment().startOf("month").format("YYYYMM") + "01"]){
+      await get().getSpecificMonthTransactions(firstDate, endDate);
+    }
 
-    // calculateBudget(filteredData, transactions);
-    // console.log(calculateBudget(filteredData, transactions));
-
-    set({ budgets: calculateBudget(filteredData, transactions) });
+    set({ budgets: calculateBudget(filteredData, transactions[moment().startOf("month").format("YYYYMM") + "01"].transactions) });
   },
   addBudgets: async (values, categories) => {
     const newBudget = {
@@ -65,8 +64,17 @@ export const budgetsSlice = (set, get) => ({
       return b.created_date - a.created_date;
     });
 
-    set({ budgets: budgetsData });
+    const transactions = get().transactionsByMonth;
+
+    set({
+      budgets: calculateBudget(
+        budgetsData,
+        transactions[moment().startOf("month").format("YYYYMM") + "01"]
+          .transactions
+      ),
+    });
   },
+
   editBudgets: async (values, categories, budgetId) => {
     const updatedBudget = {
       budget_name: values.name,
@@ -99,6 +107,14 @@ export const budgetsSlice = (set, get) => ({
       return budget;
     });
 
-    set({ budgets: updatedBudgets });
+    const transactions = get().transactionsByMonth;
+
+    set({
+      budgets: calculateBudget(
+        updatedBudgets,
+        transactions[moment().startOf("month").format("YYYYMM") + "01"]
+          .transactions
+      ),
+    });
   },
 });

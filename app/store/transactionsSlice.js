@@ -183,6 +183,8 @@ export const transactionsSlice = (set, get) => ({
     } else if (params.is_income) {
       get().addBalance({ id: params.accountId, amount: params.amount });
     }
+
+    get().recalculateBudget();
   },
 
   editTransaction: async (id, editedRecord) => {
@@ -236,6 +238,8 @@ export const transactionsSlice = (set, get) => ({
     if (editedTransaction.is_income || editedTransaction.is_expense) {
       get().recalculateBalance(originalTransaction[0], editedTransaction);
     }
+
+    get().recalculateBudget();
   },
 
   deleteTransaction: async (transaction) => { 
@@ -271,5 +275,7 @@ export const transactionsSlice = (set, get) => ({
     if (transaction.is_expense) {
       get().addBalance({ id: accountId, amount: amount });
     }
+
+    get().recalculateBudget();
   },
 });

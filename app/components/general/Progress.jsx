@@ -3,7 +3,7 @@ import React from "react";
 import { NumericFormat } from "react-number-format";
 
 function Progress({ part, whole, budget }) {
-  const progress = (Number(part) / Number(whole)) * 100;
+  const progress = (Number(part) / Number(whole)).toFixed(2) * 100;
   const progressWithPercent = progress + "%";
 
   console.log(progressWithPercent);
@@ -23,7 +23,7 @@ function Progress({ part, whole, budget }) {
             prefix={"Rp"}
           />
         </div>
-        <p>{progress}%</p>
+        <p>{progressWithPercent}</p>
       </div>
       <div className="w-full bg-gray-200 rounded-full h-2.5 flex">
         <div

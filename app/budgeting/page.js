@@ -382,7 +382,7 @@ function budgeting() {
                     xAxis: {
                       type: "category",
                       boundaryGap: false,
-                      data: budget.allDates,
+                      data: budget.dates,
                     },
                     yAxis: {
                       type: "value",
@@ -409,8 +409,7 @@ function budgeting() {
                       right: 10,
                       pieces: [
                         {
-                          gt: 0,
-                          // lte: Number(budget.budget_amount),
+                          gt: -1,
                           lt:
                             budget.spending.findIndex(
                               (item) => item > budget.budget_amount
@@ -427,11 +426,11 @@ function budgeting() {
                               : budget.spending.findIndex(
                                   (item) => item > budget.budget_amount
                                 ),
-                          color: "#08c91b",
+                          color: "#00C914",
                         },
                       ],
                       outOfRange: {
-                        color: "#f20713",
+                        color: "#ff2e1f",
                       },
                       height: "50px",
                     },
@@ -455,9 +454,11 @@ function budgeting() {
                           label: {
                             show: true,
                             formatter: "Today",
+                            color: "#94a3b8",
                           },
                           lineStyle: {
-                            color: "#080808",
+                            color: "#94a3b8",
+                            type: "solid",
                           },
                           data: [
                             {
@@ -466,8 +467,10 @@ function budgeting() {
                           ],
                         },
                         type: "line",
+                        symbol: "emptyCircle",
+                        showSymbol: true,
                         areaStyle: {},
-                        showSymbol: false,
+                        showSymbol: true,
                       },
                       {
                         data: budget.forecast,
@@ -479,9 +482,10 @@ function budgeting() {
                           label: {
                             show: true,
                             formatter: "Budget Limit",
+                            color: "#475569",
                           },
                           lineStyle: {
-                            color: "#f20713",
+                            color: "#ef4444",
                           },
                           data: [
                             {
@@ -493,7 +497,7 @@ function budgeting() {
                           show: false,
                         },
                         lineStyle: {
-                          color: "blue",
+                          color: "#2347BD",
                         },
                       },
                     ],
@@ -504,7 +508,7 @@ function budgeting() {
                     <div>
                       <p className="text-sm">
                         <NumericFormat
-                          value={budget.dailyAverage}
+                          value={Number(budget.dailyAverage).toFixed(2)}
                           displayType={"text"}
                           thousandSeparator="."
                           decimalSeparator=","
@@ -516,7 +520,7 @@ function budgeting() {
                     <div className="text-right">
                       <p className="text-sm">
                         <NumericFormat
-                          value={budget.dailyRecomended}
+                          value={Number(budget.dailyRecomended).toFixed(2)}
                           displayType={"text"}
                           thousandSeparator="."
                           decimalSeparator=","

@@ -97,3 +97,31 @@ body {
 .icon-size {
   @apply text-[2.75rem] leading-10;
 }
+
+.coin{
+  animation: jump_4123 1.2s ease-in-out infinite;
+}
+
+.coin:nth-child(1) {
+  animation-delay: 0.2s;
+}
+.coin:nth-child(2) {
+  animation-delay: 0.4s;
+}
+.coin:nth-child(3) {
+  animation-delay: 0.6s;
+}
+.coin:nth-child(4) {
+  animation-delay: 0.8s;
+}
+
+
+@keyframes jump_4123 {
+  0%, 100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-40px);
+  }
+}

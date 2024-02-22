@@ -30,8 +30,8 @@ function RecentTransactions() {
 
   return (
     <div className="h-full overflow-auto mt-1 divide-y-2">
-      {transactions.map((transaction) => (
-        <div className="grid grid-cols-12 text-sm hover:bg-slate-100 my-1">
+      {transactions.map((transaction, index) => (
+        <div key={index} className="grid grid-cols-12 text-sm hover:bg-slate-100 my-1">
           <div className="col-span-8 py-2">
             <div className="items-center flex w-full gap-x-1">
               <div

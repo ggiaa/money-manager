@@ -74,7 +74,9 @@ function CurrentWeekStatistic() {
   };
   return (
     <div className="h-full flex flex-col">
-      <div>This Week Statistic</div>
+      <div className="px-2 py-2">
+        <p className="text-sm font-semibold">Current Week Statistic</p>
+      </div>
       <div className="flex-1">
         <EChartsReact className="min-h-full" option={option} />
       </div>

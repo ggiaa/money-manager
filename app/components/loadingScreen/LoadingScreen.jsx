@@ -2,7 +2,7 @@ import React from 'react'
 
 function LoadingScreen() {
  return (
-   <div className="fixed bg-slate-900 bg-opacity-70 w-screen h-screen left-0 top-0 z-[100] flex justify-center items-center">
+   <div className="fixed w-screen h-screen left-0 top-0 z-[100] flex justify-center items-center">
      <div className="flex gap-x-3 coin-parent">
        <div className="border-t-2 border-b-2 border-r-4 rounded-full border-yellow-600 bg-yellow-400 aspect-square w-8 flex justify-center items-center text-yellow-700 coin">
          <span className="font-bold">

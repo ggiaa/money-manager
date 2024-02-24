@@ -123,6 +123,7 @@ export const budgetsSlice = (set, get) => ({
   },
   recalculateBudget: async() => {
     const transactions = get().transactionsByMonth;
+    console.log(transactions);
     set({budgets: calculateBudget(get().budgets, transactions[moment().startOf("month").format("YYYYMM") + "01"].transactions),});
   }
 

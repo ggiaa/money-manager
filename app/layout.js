@@ -17,7 +17,7 @@ export default function RootLayout({ children }) {
   const [modalOpen, setModalOpen] = useState(false);
 
   return (
-    <html lang="en" className="bg-slate-200">
+    <html lang="en" className="bg-slate-300">
       <body className={inter.className}>
         <div className="h-[90vh] p-2">{children}</div>
 

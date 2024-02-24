@@ -33,17 +33,20 @@ export const transactionsSlice = (set, get) => ({
   currentMonthExpenseByCategory: [], // total berdasarkan kategori
   fetched: false, //flag apakah datanya sudah di fetch atau belum
 
-  getSpecificMonthTransactions: async (startDate, endDate) => {
+  getSpecificMonthTransactions: async (
+    startDate = moment().startOf("month").format("YYYY-MM-DD"),
+    endDate = moment().endOf("month").format("YYYY-MM-DD")
+  ) => {
     const currentTransactionsByMonth = get().transactionsByMonth;
     const key = moment(startDate).format("YYYYMMDD");
 
-    if(key in currentTransactionsByMonth){
+    if (key in currentTransactionsByMonth) {
       return;
-    } 
+    }
 
     const transactions = [];
     const transactionsAmount = [];
-    
+
     const q = query(
       collection(db, "transactions"),
       where("date", ">=", moment(startDate).toDate()),
@@ -55,9 +58,9 @@ export const transactionsSlice = (set, get) => ({
         ...doc.data(),
         id: doc.id,
         date: doc.data().date.toDate(),
-      }
+      };
 
-      transactions.push(data)
+      transactions.push(data);
 
       // handle transactions amount
       const existingItem = transactionsAmount.find(
@@ -78,63 +81,68 @@ export const transactionsSlice = (set, get) => ({
         });
       }
     });
-    
+
     const transactionObject = {
       transactions: transactions,
       transactionsAmount,
     };
-    
+
     currentTransactionsByMonth[key] = transactionObject;
 
     set({ transactionsByMonth: currentTransactionsByMonth });
   },
 
   fetchTransactions: async () => {
-    if (!get().fetched) {
-      const startDate = moment().startOf("month").toDate();
+    get().setIsFailed(false);
+    try {
+      if (!get().fetched) {
+        const startDate = moment().startOf("month").toDate();
 
-      let querySnapshot = (
-        await getDocs(
-          query(
-            collection(db, "transactions"),
-            where("date", ">=", startDate),
-            orderBy("date", "desc")
+        let querySnapshot = (
+          await getDocs(
+            query(
+              collection(db, "transactions"),
+              where("date", ">=", startDate),
+              orderBy("date", "desc")
+            )
           )
-        )
-      ).docs;
+        ).docs;
 
-      if (querySnapshot.length < 8) {
-        const latestQuery = query(
-          collection(db, "transactions"),
-          orderBy("date", "desc"),
-          limit(8)
-        );
-        querySnapshot = (await getDocs(latestQuery)).docs;
-      } else {
+        if (querySnapshot.length < 8) {
+          const latestQuery = query(
+            collection(db, "transactions"),
+            orderBy("date", "desc"),
+            limit(8)
+          );
+          querySnapshot = (await getDocs(latestQuery)).docs;
+        } else {
+        }
+
+        const transactions = querySnapshot.map((doc) => ({
+          ...doc.data(),
+          id: doc.id,
+          date: doc.data().date.toDate(),
+        }));
+
+        const mapping = mappingTransactions(transactions);
+
+        set({
+          transactions: transactions,
+          latestTransactions: mapping.latestTransactions,
+          currentWeekTransactionsStatistic:
+            mapping.currentWeekTransactionsStatistic,
+          specificMonthTransactions: mapping.specificMonthTransactions,
+          currentMonthExpenseTransactions:
+            mapping.currentMonthExpenseTransactions,
+          currentMonthTotalIncome: mapping.currentMonthTotalIncome,
+          currentMonthTotalExpense: mapping.currentMonthTotalExpense,
+          currentMonthIncomeByCategory: mapping.currentMonthIncomeByCategory,
+          currentMonthExpenseByCategory: mapping.currentMonthExpenseByCategory,
+          fetched: true,
+        });
       }
-
-      const transactions = querySnapshot.map((doc) => ({
-        ...doc.data(),
-        id: doc.id,
-        date: doc.data().date.toDate(),
-      }));
-
-      const mapping = mappingTransactions(transactions);
-
-      set({
-        transactions: transactions,
-        latestTransactions: mapping.latestTransactions,
-        currentWeekTransactionsStatistic:
-          mapping.currentWeekTransactionsStatistic,
-        specificMonthTransactions: mapping.specificMonthTransactions,
-        currentMonthExpenseTransactions:
-          mapping.currentMonthExpenseTransactions,
-        currentMonthTotalIncome: mapping.currentMonthTotalIncome,
-        currentMonthTotalExpense: mapping.currentMonthTotalExpense,
-        currentMonthIncomeByCategory: mapping.currentMonthIncomeByCategory,
-        currentMonthExpenseByCategory: mapping.currentMonthExpenseByCategory,
-        fetched: true,
-      });
+    } catch (error) {
+      get().setIsFailed(true);
     }
   },
 
@@ -163,13 +171,17 @@ export const transactionsSlice = (set, get) => ({
     ];
 
     const mapping = mappingTransactions(transactions);
-    const transactionsByMonth = transactionsByMonthAddAction(get().transactionsByMonth, { ...newTransactionData, id: docRef.id });
+    const transactionsByMonth = transactionsByMonthAddAction(
+      get().transactionsByMonth,
+      { ...newTransactionData, id: docRef.id }
+    );
 
     set({
       transactions: transactions,
-      transactionsByMonth : transactionsByMonth,
+      transactionsByMonth: transactionsByMonth,
       latestTransactions: mapping.latestTransactions,
-      currentWeekTransactionsStatistic: mapping.currentWeekTransactionsStatistic,
+      currentWeekTransactionsStatistic:
+        mapping.currentWeekTransactionsStatistic,
       specificMonthTransactions: mapping.specificMonthTransactions,
       currentMonthExpenseTransactions: mapping.currentMonthExpenseTransactions,
       currentMonthTotalIncome: mapping.currentMonthTotalIncome,
@@ -205,11 +217,15 @@ export const transactionsSlice = (set, get) => ({
       note: editedRecord.note,
     };
 
-    if(!originalTransaction.length){
+    if (!originalTransaction.length) {
       const docRef = doc(db, "transactions", id);
       const docSnap = await getDoc(docRef);
       originalTransaction = [
-        { ...docSnap.data(), date: docSnap.data().date.toDate(), id: docSnap.id },
+        {
+          ...docSnap.data(),
+          date: docSnap.data().date.toDate(),
+          id: docSnap.id,
+        },
       ];
     }
 
@@ -220,13 +236,18 @@ export const transactionsSlice = (set, get) => ({
     );
 
     const mapping = mappingTransactions(transactions);
-    const transactionsByMonth = transactionsByMonthEditAction(get().transactionsByMonth, originalTransaction[0], { ...editedTransaction, id: id });
+    const transactionsByMonth = transactionsByMonthEditAction(
+      get().transactionsByMonth,
+      originalTransaction[0],
+      { ...editedTransaction, id: id }
+    );
 
     set({
       transactions: transactions,
       transactionsByMonth: transactionsByMonth,
       latestTransactions: mapping.latestTransactions,
-      currentWeekTransactionsStatistic: mapping.currentWeekTransactionsStatistic,
+      currentWeekTransactionsStatistic:
+        mapping.currentWeekTransactionsStatistic,
       specificMonthTransactions: mapping.specificMonthTransactions,
       currentMonthExpenseTransactions: mapping.currentMonthExpenseTransactions,
       currentMonthTotalIncome: mapping.currentMonthTotalIncome,
@@ -242,7 +263,7 @@ export const transactionsSlice = (set, get) => ({
     get().recalculateBudget();
   },
 
-  deleteTransaction: async (transaction) => { 
+  deleteTransaction: async (transaction) => {
     const accountId = transaction.account_id;
     const amount = transaction.amount;
     await deleteDoc(doc(db, "transactions", transaction.id));
@@ -252,13 +273,17 @@ export const transactionsSlice = (set, get) => ({
     );
 
     const mapping = mappingTransactions(transactions);
-    const transactionsByMonth = transactionsByMonthDeleteAction(get().transactionsByMonth, transaction);
-    
+    const transactionsByMonth = transactionsByMonthDeleteAction(
+      get().transactionsByMonth,
+      transaction
+    );
+
     set({
       transactions: transactions,
       transactionsByMonth: transactionsByMonth,
       latestTransactions: mapping.latestTransactions,
-      currentWeekTransactionsStatistic: mapping.currentWeekTransactionsStatistic,
+      currentWeekTransactionsStatistic:
+        mapping.currentWeekTransactionsStatistic,
       specificMonthTransactions: mapping.specificMonthTransactions,
       currentMonthExpenseTransactions: mapping.currentMonthExpenseTransactions,
       currentMonthTotalIncome: mapping.currentMonthTotalIncome,
@@ -267,7 +292,6 @@ export const transactionsSlice = (set, get) => ({
       currentMonthExpenseByCategory: mapping.currentMonthExpenseByCategory,
     });
 
-    
     if (transaction.is_income) {
       get().subtractBalance({ id: accountId, amount: amount });
     }

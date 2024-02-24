@@ -31,7 +31,10 @@ function RecentTransactions() {
   return (
     <div className="h-full overflow-auto mt-1 divide-y-2">
       {transactions.map((transaction, index) => (
-        <div key={index} className="grid grid-cols-12 text-sm hover:bg-slate-100 my-1">
+        <div
+          key={index}
+          className="grid grid-cols-12 text-sm hover:bg-slate-100 my-1 group pl-1 cursor-default"
+        >
           <div className="col-span-8 py-2">
             <div className="items-center flex w-full gap-x-1">
               <div
@@ -55,7 +58,7 @@ function RecentTransactions() {
               </div>
             </div>
           </div>
-          <div className="col-span-4 py-2 text-right group relative overflow-hidden">
+          <div className="col-span-4 py-2 text-right relative overflow-hidden">
             <p className="text-red-500">
               <NumericFormat
                 value={transaction.amount}
@@ -76,18 +79,22 @@ function RecentTransactions() {
               })}
             </p>
 
-            <div className="absolute cursor-pointer group-hover:right-0 transition-all duration-500 transform translate-x-0 ease -right-36 flex items-center h-full top-0">
-              <div
-                className="bg-sky-400 px-4 h-full flex items-center hover:bg-sky-500 hover:text-white"
-                onClick={() => handleEditTransaction(transaction)}
-              >
-                <PiNotePencil className="text-xl" />
+            <div className="absolute bg-slate-100 cursor-pointer group-hover:right-0 transition-all duration-500 transform translate-x-0 ease -right-36 flex items-center h-full top-0">
+              <div className="h-full flex items-center">
+                <div
+                  className="bg-sky-400 hover:bg-sky-500 hover:text-white py-[6px] px-3 rounded"
+                  onClick={() => handleEditTransaction(transaction)}
+                >
+                  <PiNotePencil className="text-xl" />
+                </div>
               </div>
-              <div
-                className="bg-red-400 px-4 h-full flex items-center hover:bg-red-500 hover:text-white"
-                onClick={() => handleDeleteTransaction(transaction)}
-              >
-                <PiTrash className="text-xl" />
+              <div className="px-4 h-full flex items-center">
+                <div
+                  className="bg-red-400 hover:bg-red-500 hover:text-white py-[6px] px-3 rounded"
+                  onClick={() => handleDeleteTransaction(transaction)}
+                >
+                  <PiTrash className="text-xl" />
+                </div>
               </div>
             </div>
           </div>

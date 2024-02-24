@@ -124,7 +124,7 @@ export const transactionsSlice = (set, get) => ({
           date: doc.data().date.toDate(),
         }));
 
-        const mapping = mappingTransactions(transactions);
+        const mapping = await mappingTransactions(transactions);
 
         set({
           transactions: transactions,
@@ -170,7 +170,7 @@ export const transactionsSlice = (set, get) => ({
       { ...newTransactionData, id: docRef.id },
     ];
 
-    const mapping = mappingTransactions(transactions);
+    const mapping = await mappingTransactions(transactions);
     const transactionsByMonth = transactionsByMonthAddAction(
       get().transactionsByMonth,
       { ...newTransactionData, id: docRef.id }
@@ -235,8 +235,8 @@ export const transactionsSlice = (set, get) => ({
       transaction.id == id ? { ...editedTransaction, id: id } : transaction
     );
 
-    const mapping = mappingTransactions(transactions);
-    const transactionsByMonth = transactionsByMonthEditAction(
+    const mapping = await mappingTransactions(transactions);
+    const transactionsByMonth = await transactionsByMonthEditAction(
       get().transactionsByMonth,
       originalTransaction[0],
       { ...editedTransaction, id: id }
@@ -272,8 +272,8 @@ export const transactionsSlice = (set, get) => ({
       (trans) => trans.id !== transaction.id
     );
 
-    const mapping = mappingTransactions(transactions);
-    const transactionsByMonth = transactionsByMonthDeleteAction(
+    const mapping = await mappingTransactions(transactions);
+    const transactionsByMonth = await transactionsByMonthDeleteAction(
       get().transactionsByMonth,
       transaction
     );

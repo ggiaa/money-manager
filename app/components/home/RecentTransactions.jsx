@@ -12,6 +12,7 @@ function RecentTransactions() {
   const boundedStore = useStore(useBoundedStore);
   const transactions = useBoundedStore((state) => state.latestTransactions);
 
+  console.log(transactions);
   const [modalOpen, setModalOpen] = useState(false);
   const [editedData, setEditedData] = useState("");
 
@@ -30,7 +31,7 @@ function RecentTransactions() {
 
   return (
     <div className="h-full overflow-auto mt-1 divide-y-2">
-      {transactions.map((transaction, index) => (
+      {transactions?.map((transaction, index) => (
         <div
           key={index}
           className="grid grid-cols-12 text-sm hover:bg-slate-100 my-1 group pl-1 cursor-default"

@@ -56,7 +56,6 @@ function Calendar({
     return days;
   };
 
-  // console.log(transactionsAmount);
   useEffect(() => {
     const data = generateCalendarData(currentMonth);
     setCalendarData(data);
@@ -71,74 +70,43 @@ function Calendar({
               {currentMonth.format("MMMM YYYY")}
             </p>
             <div className="flex gap-x-4 cursor-pointer">
-              <div
-                onClick={() =>
-                  setCurrentMonth(currentMonth.clone().subtract(1, "months"))
-                }
-              >
+              <div onClick={() => setCurrentMonth(currentMonth.clone().subtract(1, "months"))}>
                 Previous
               </div>
-              <div
-                onClick={() =>
-                  setCurrentMonth(currentMonth.clone().add(1, "months"))
-                }
-              >
+              <div onClick={() => setCurrentMonth(currentMonth.clone().add(1, "months"))}>
                 Next
               </div>
             </div>
           </div>
 
           <div className="flex">
-            <div className="w-[calc(100%/7)] text-center">
-              <p fontSize={14}>SUN</p>
-            </div>
-            <div className="w-[calc(100%/7)] text-center">
-              <p fontSize={14}>MON</p>
-            </div>
-            <div className="w-[calc(100%/7)] text-center">
-              <p fontSize={14}>TUE</p>
-            </div>
-            <div className="w-[calc(100%/7)] text-center">
-              <p fontSize={14}>WED</p>
-            </div>
-            <div className="w-[calc(100%/7)] text-center">
-              <p fontSize={14}>THU</p>
-            </div>
-            <div className="w-[calc(100%/7)] text-center">
-              <p fontSize={14}>FRI</p>
-            </div>
-            <div className="w-[calc(100%/7)] text-center">
-              <p fontSize={14}>SAT</p>
-            </div>
+            <div className="w-[calc(100%/7)] text-center"><p fontSize={14}>SUN</p></div>
+            <div className="w-[calc(100%/7)] text-center"><p fontSize={14}>MON</p></div>
+            <div className="w-[calc(100%/7)] text-center"><p fontSize={14}>TUE</p></div>
+            <div className="w-[calc(100%/7)] text-center"><p fontSize={14}>WED</p></div>
+            <div className="w-[calc(100%/7)] text-center"><p fontSize={14}>THU</p></div>
+            <div className="w-[calc(100%/7)] text-center"><p fontSize={14}>FRI</p></div>
+            <div className="w-[calc(100%/7)] text-center"><p fontSize={14}>SAT</p></div>
           </div>
 
           <div className="border border-t-[1px] border-l-[1px] flex flex-wrap">
             {calendarData.map((day, index) => (
               <div
                 key={index}
-                className={`${
-                  day.date.format("YYYY-MM-DD") == selectedDate
-                    ? "bg-blue-200"
-                    : ""
-                } ${
-                  day.isCurrentMonth ? "text-black" : "text-slate-400 bg-slate-100"
-                } border-r-[1px] border-b-[1px] border w-[calc(100%/7)] h-[4.9rem] cursor-pointer flex flex-col`}
-                onClick={() => setSelectedDate(day.date.format("YYYY-MM-DD"))}
+                className={`${day.date.format("YYYY-MM-DD") == selectedDate ? "bg-blue-200" : ""} ${day.isCurrentMonth ? "text-black cursor-pointer" : "bg-slate-100"} border-r-[1px] border-b-[1px] border w-[calc(100%/7)] h-[4.9rem] flex flex-col`}
+                onClick={() => day.isCurrentMonth && setSelectedDate(day.date.format("YYYY-MM-DD"))}
               >
-                {day.isCurrentMonth && 
-                <>
-                  <div className="flex-1">
-                    <p>{day.date.format("YYYY-MM-DD")}</p>
-                  </div>
+                {day.isCurrentMonth && (
+                  <>
+                    <div className="flex-1">
+                      <p>{day.date.format("DD")}</p>
+                    </div>
 
-                  <div className="text-xs px-1 text-right">
-                    <CalendarTotalIncomeExpense
-                      transactionsAmount={transactionsAmount}
-                      day={day.date.format("YYYY-MM-DD")}
-                    />
-                  </div>
-                </>
-                }
+                    <div className="text-xs px-1 text-right">
+                      <CalendarTotalIncomeExpense transactionsAmount={transactionsAmount} day={day.date.format("YYYY-MM-DD")} />
+                    </div>
+                  </>
+                )}
               </div>
             ))}
           </div>

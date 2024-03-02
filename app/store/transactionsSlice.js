@@ -33,63 +33,65 @@ export const transactionsSlice = (set, get) => ({
   currentMonthExpenseByCategory: [], // total berdasarkan kategori
   fetched: false, //flag apakah datanya sudah di fetch atau belum
 
-  getSpecificMonthTransactions: async (
-    startDate = moment().startOf("month").format("YYYY-MM-DD"),
-    endDate = moment().endOf("month").format("YYYY-MM-DD")
-  ) => {
-    const currentTransactionsByMonth = get().transactionsByMonth;
-    const key = moment(startDate).format("YYYYMMDD");
-
-    if (key in currentTransactionsByMonth) {
-      return;
-    }
-
-    const transactions = [];
-    const transactionsAmount = [];
-
-    const q = query(
-      collection(db, "transactions"),
-      where("date", ">=", moment(startDate).toDate()),
-      where("date", "<=", moment(endDate).toDate())
-    );
-    const querySnapshot = await getDocs(q);
-    querySnapshot.docs.map((doc) => {
-      const data = {
-        ...doc.data(),
-        id: doc.id,
-        date: doc.data().date.toDate(),
-      };
-
-      transactions.push(data);
-
-      // handle transactions amount
-      const existingItem = transactionsAmount.find(
-        (i) => i.date == moment(data.date).format("YYYY-MM-DD")
-      );
-
-      if (existingItem) {
-        if (data.is_income) {
-          existingItem.income += data.amount;
-        } else if (data.is_expense) {
-          existingItem.expense += data.amount;
-        }
-      } else {
-        transactionsAmount.push({
-          date: moment(data.date).format("YYYY-MM-DD"),
-          income: data.is_income ? data.amount : 0,
-          expense: data.is_expense ? data.amount : 0,
-        });
+  getSpecificMonthTransactions: async (startDate = moment().startOf("month").format("YYYY-MM-DD"), endDate = moment().endOf("month").format("YYYY-MM-DD")) => {
+    get().setIsFailed(false);
+    try {
+      const currentTransactionsByMonth = get().transactionsByMonth;
+      const key = moment(startDate).format("YYYYMMDD");
+  
+      if (key in currentTransactionsByMonth) {
+        return;
       }
-    });
-
-    const transactionObject = {
-      transactions: transactions,
-      transactionsAmount,
-    };
-
-    currentTransactionsByMonth[key] = transactionObject;
-
-    set({ transactionsByMonth: currentTransactionsByMonth });
+  
+      const transactions = [];
+      const transactionsAmount = [];
+  
+      const q = query(
+        collection(db, "transactions"),
+        where("date", ">=", moment(startDate).toDate()),
+        where("date", "<=", moment(endDate).toDate())
+      );
+      const querySnapshot = await getDocs(q);
+      querySnapshot.docs.map((doc) => {
+        const data = {
+          ...doc.data(),
+          id: doc.id,
+          date: doc.data().date.toDate(),
+        };
+  
+        transactions.push(data);
+  
+        // handle transactions amount
+        const existingItem = transactionsAmount.find(
+          (i) => i.date == moment(data.date).format("YYYY-MM-DD")
+        );
+  
+        if (existingItem) {
+          if (data.is_income) {
+            existingItem.income += data.amount;
+          } else if (data.is_expense) {
+            existingItem.expense += data.amount;
+          }
+        } else {
+          transactionsAmount.push({
+            date: moment(data.date).format("YYYY-MM-DD"),
+            income: data.is_income ? data.amount : 0,
+            expense: data.is_expense ? data.amount : 0,
+          });
+        }
+      });
+  
+      const transactionObject = {
+        transactions: transactions,
+        transactionsAmount,
+      };
+  
+      currentTransactionsByMonth[key] = transactionObject;
+  
+      set({ transactionsByMonth: currentTransactionsByMonth });
+    } catch (error) {
+      get().setIsFailed(true);
+    }
   },
 
   fetchTransactions: async () => {

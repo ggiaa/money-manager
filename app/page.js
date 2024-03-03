@@ -22,29 +22,17 @@ export default function Home() {
   const isFailed = useBoundedStore(state => state.isFailed);
 
   useEffect(() => {
-    const fetch = async () => {
-      boundedStore.setIsLoading(true);
+    try {
+      boundedStore.setIsLoading();
       boundedStore.fetchTransactions();
       boundedStore.getSpecificMonthTransactions();
-      boundedStore.setIsLoading(false);
+      boundedStore.setOperationSuccess();
+    } catch (error) {
+      boundedStore.setOperationFailed();
     }
-
-    fetch();
-
   }, []);
 
   return (
-    <>
-      {isLoading 
-        ? 
-        <LoadingScreen />
-        :
-        isFailed 
-          ?
-          <Failed />
-          :
-          <Dashboard />
-      }
-    </>
+    <Dashboard />
   );
 }

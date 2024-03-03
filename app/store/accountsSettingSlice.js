@@ -14,22 +14,25 @@ export const accountsSettingSlice = (set, get) => ({
   accounts: [],
   totalBalance: 0,
   getAccounts: async () => {
-    const q = query(collection(db, "accounts"), orderBy("created_at"));
-    const querySnapshot = await getDocs(q);
-
-    const allAccounts = [];
-    let tempTotalBalance = 0;
-    const filteredData = querySnapshot.docs.map((doc) => {
-      const data = {
-        ...doc.data(),
-        id: doc.id,
-      };
-
-      allAccounts.push(data);
-      tempTotalBalance += data.account_balance;
-    });
-
-    set({ accounts: allAccounts, totalBalance: tempTotalBalance });
+    try {
+      const q = query(collection(db, "accounts"), orderBy("created_at"));
+      const querySnapshot = await getDocs(q);
+  
+      const allAccounts = [];
+      let tempTotalBalance = 0;
+      const filteredData = querySnapshot.docs.map((doc) => {
+        const data = {
+          ...doc.data(),
+          id: doc.id,
+        };
+  
+        allAccounts.push(data);
+        tempTotalBalance += data.account_balance;
+      });
+  
+      set({ accounts: allAccounts, totalBalance: tempTotalBalance });      
+    } catch (e) {
+    }
   },
   addAccount: async (params) => {
     const newAccount = {

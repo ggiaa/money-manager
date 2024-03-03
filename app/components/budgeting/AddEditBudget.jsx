@@ -73,13 +73,21 @@ function AddEditBudget({ setAddEditModalDisplay, budget = null }) {
     },
     validationSchema: schema,
     onSubmit: (values) => {
-      if (budget) {
-        boundedStore.editBudgets(values, expenseCategories, budget.id);
-      } else {
-        boundedStore.addBudgets(values, expenseCategories);
+      try {
+        boundedStore.setIsLoading();
+        
+        if (budget) {
+          boundedStore.editBudgets(values, expenseCategories, budget.id);
+        } else {
+          boundedStore.addBudgets(values, expenseCategories);
+        }
+        setAddEditModalDisplay(false);
+        formik.resetForm();
+        
+        boundedStore.setOperationSuccess();
+      } catch (error) {
+        boundedStore.setOperationFailed();
       }
-      setAddEditModalDisplay(false);
-      formik.resetForm();
     },
   });
   const { errors, touched } = formik;
@@ -168,7 +176,13 @@ function AddEditBudget({ setAddEditModalDisplay, budget = null }) {
   };
 
   useEffect(() => {
-    boundedStore.getCategories();
+    try {
+      boundedStore.setIsLoading();
+      boundedStore.getCategories();
+      boundedStore.setOperationSuccess();
+    } catch (error) {
+      boundedStore.setOperationFailed();
+    }
   }, []);
 
   return (

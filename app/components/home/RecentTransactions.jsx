@@ -12,7 +12,6 @@ function RecentTransactions() {
   const boundedStore = useStore(useBoundedStore);
   const transactions = useBoundedStore((state) => state.latestTransactions);
 
-  console.log(transactions);
   const [modalOpen, setModalOpen] = useState(false);
   const [editedData, setEditedData] = useState("");
 
@@ -22,12 +21,14 @@ function RecentTransactions() {
   };
 
   const handleDeleteTransaction = (transactionData) => {
-    boundedStore.deleteTransaction(transactionData);
+    try {
+      boundedStore.setIsLoading();
+      boundedStore.deleteTransaction(transactionData);
+      boundedStore.setOperationSuccess();
+    } catch (error) {
+      boundedStore.setOperationFailed();
+    }
   };
-
-  useEffect(() => {
-    // boundedStore.getTransactions();
-  }, []);
 
   return (
     <div className="h-full overflow-auto mt-1 divide-y-2">

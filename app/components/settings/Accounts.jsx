@@ -24,7 +24,13 @@ function Accounts() {
   };
 
   useEffect(() => {
-    boundedStore.getAccounts();
+    try {
+      boundedStore.setIsLoading();
+      boundedStore.getAccounts();
+      boundedStore.setOperationSuccess();
+    } catch (error) {
+      boundedStore.setOperationFailed();
+    }
   }, []);
 
   return (

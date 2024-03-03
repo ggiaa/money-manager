@@ -34,7 +34,6 @@ export const transactionsSlice = (set, get) => ({
   fetched: false, //flag apakah datanya sudah di fetch atau belum
 
   getSpecificMonthTransactions: async (startDate = moment().startOf("month").format("YYYY-MM-DD"), endDate = moment().endOf("month").format("YYYY-MM-DD")) => {
-    get().setIsFailed(false);
     try {
       const currentTransactionsByMonth = get().transactionsByMonth;
       const key = moment(startDate).format("YYYYMMDD");
@@ -90,12 +89,10 @@ export const transactionsSlice = (set, get) => ({
   
       set({ transactionsByMonth: currentTransactionsByMonth });
     } catch (error) {
-      get().setIsFailed(true);
     }
   },
 
   fetchTransactions: async () => {
-    get().setIsFailed(false);
     try {
       if (!get().fetched) {
         const startDate = moment().startOf("month").toDate();
@@ -144,7 +141,6 @@ export const transactionsSlice = (set, get) => ({
         });
       }
     } catch (error) {
-      get().setIsFailed(true);
     }
   },
 

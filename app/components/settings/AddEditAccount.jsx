@@ -21,18 +21,26 @@ function AddEditAccount({ setShowModal, account = null }) {
     },
     validationSchema: schema,
     onSubmit: (values) => {
-      const accountName = values.account_name;
-      const accountBalance = values.account_balance;
-
-      if (account) {
-        // case edit an account
-        const accountId = account.id;
-        boundedStore.editAccount({ accountId, accountName, accountBalance });
-        setShowModal(false);
-      } else {
-        // case add an account
-        boundedStore.addAccount({ accountName, accountBalance });
-        setShowModal(false);
+      try {
+        boundedStore.setIsLoading();
+        
+        const accountName = values.account_name;
+        const accountBalance = values.account_balance;
+        
+        if (account) {
+          // case edit an account
+          const accountId = account.id;
+          boundedStore.editAccount({ accountId, accountName, accountBalance });
+          setShowModal(false);
+        } else {
+          // case add an account
+          boundedStore.addAccount({ accountName, accountBalance });
+          setShowModal(false);
+        }
+        
+        boundedStore.setOperationSuccess();
+      } catch (error) {
+        boundedStore.setOperationFailed();
       }
     },
   });
@@ -49,9 +57,15 @@ function AddEditAccount({ setShowModal, account = null }) {
   };
 
   const handleDelete = () => {
-    const accountId = account.id;
-    boundedStore.deleteAccount({ accountId });
-    setShowModal(false);
+    try {
+      boundedStore.setIsLoading();
+      const accountId = account.id;
+      boundedStore.deleteAccount({ accountId });
+      setShowModal(false);
+      boundedStore.setOperationSuccess();
+    } catch (error) {
+      boundedStore.setOperationFailed();
+    }
   };
 
   return (

@@ -46,13 +46,21 @@ function AddEditTransaction({
     },
     validationSchema: schema,
     onSubmit: (values) => {
-      if (transactionData) {
-        boundedStore.editTransaction(transactionData.id, values);
-      } else {
-        boundedStore.addTransaction(values);
+      try {
+        boundedStore.setIsLoading();
+        
+        if (transactionData) {
+          boundedStore.editTransaction(transactionData.id, values);
+        } else {
+          boundedStore.addTransaction(values);
+        }
+        setModalOpen(false);
+        formik.resetForm();
+        
+        boundedStore.setOperationSuccess();
+      } catch (error) {
+        boundedStore.setOperationFailed();
       }
-      setModalOpen(false);
-      formik.resetForm();
     },
   });
   const { errors, touched } = formik;
@@ -118,8 +126,14 @@ function AddEditTransaction({
   };
 
   useEffect(() => {
-    boundedStore.getCategories();
-    boundedStore.getAccounts();
+    try {
+      boundedStore.setIsLoading();
+      boundedStore.getCategories();
+      boundedStore.getAccounts();
+      boundedStore.setOperationSuccess();
+    } catch (error) {
+      boundedStore.setOperationFailed();
+    }
   }, []);
 
   useEffect(() => {

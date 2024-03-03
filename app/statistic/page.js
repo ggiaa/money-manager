@@ -21,11 +21,15 @@ function statistic() {
   const [calendarEnd, setCalendarEnd] = useState();
 
   useEffect(() => {
-    boundedStore.setIsLoading(true);
     if (calendarStart && calendarEnd) {
-      boundedStore.getSpecificMonthTransactions(calendarStart, calendarEnd);
+      try {
+        boundedStore.setIsLoading();
+        boundedStore.getSpecificMonthTransactions(calendarStart, calendarEnd);
+        boundedStore.setOperationSuccess();
+      } catch (error) {
+        boundedStore.setOperationFailed();
+      }
     }
-    boundedStore.setIsLoading(false);
   }, [calendarStart]);
 
   return (

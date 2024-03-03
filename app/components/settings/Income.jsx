@@ -23,7 +23,13 @@ function Income() {
   };
 
   useEffect(() => {
-    boundedStore.getCategories();
+    try {
+      boundedStore.setIsLoading();
+      boundedStore.getCategories();
+      boundedStore.setOperationSuccess();
+    } catch (error) {
+      boundedStore.setOperationFailed();
+    }
   }, []);
 
   return (

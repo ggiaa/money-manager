@@ -71,17 +71,29 @@ function Expense() {
 
   // Save the sub category changes
   const handleSaveSubCategory = () => {
-    const categoryId = selectedCategory.id;
-    const newSubCategory = subCategory.filter((item) => item);
-    boundedStore.updateSubCategory({ categoryId, newSubCategory });
-
-    setSidebarIsOpen(false);
-    setSubCategory([""]);
-    setSelectedCategory("");
+    try {
+      boundedStore.setIsLoading();
+      const categoryId = selectedCategory.id;
+      const newSubCategory = subCategory.filter((item) => item);
+      boundedStore.updateSubCategory({ categoryId, newSubCategory });
+      
+      setSidebarIsOpen(false);
+      setSubCategory([""]);
+      setSelectedCategory("");
+      boundedStore.setOperationSuccess();
+    } catch (error) {
+      boundedStore.setOperationFailed();
+    }
   };
 
   useEffect(() => {
-    boundedStore.getCategories();
+    try {
+      boundedStore.setIsLoading();
+      boundedStore.getCategories();
+      boundedStore.setOperationSuccess();
+    } catch (error) {
+      boundedStore.setOperationFailed();
+    }
   }, []);
 
   return (

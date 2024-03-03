@@ -1,10 +1,13 @@
 export const globalSlice = (set, get) => ({
-    isLoading: true,
+    isLoading: false,
     isFailed: false,
-    setIsLoading: (val) => {
-        set({ isLoading : val });
+    setIsLoading: () => {
+        set({ isLoading : true });
     },
-    setIsFailed: (val) => {
-        set({ isFailed : val });
+    setOperationFailed: () => {
+        set({ isLoading: false, isFailed: true })
+    },
+    setOperationSuccess: () => {
+        set({ isLoading: false, isFailed: false })
     },
 })

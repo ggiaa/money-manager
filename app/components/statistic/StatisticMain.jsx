@@ -19,7 +19,13 @@ function StatisticMain({calendarStart, calendarEnd, setCalendarStart, setCalenda
     };
 
     const handleDeleteTransaction = (transactionData) => {
+      try {
+        boundedStore.setIsLoading();
         boundedStore.deleteTransaction(transactionData);
+        boundedStore.setOperationSuccess();
+      } catch (error) {
+        boundedStore.setOperationFailed();
+      }
     };
 
   return (

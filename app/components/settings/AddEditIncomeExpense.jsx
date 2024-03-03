@@ -19,28 +19,35 @@ function AddEditIncomeExpense({ setShowModal, item, category }) {
     },
     validationSchema: schema,
     onSubmit: (values) => {
-      const categoryName = values.category_name;
-      const iconName = values.icon_name;
-      const isIncome = item.is_income;
-      const isExpense = item.is_expense;
-      if (item) {
-        const categoryId = item.id;
-        boundedStore.editCategory({
-          categoryId,
-          categoryName,
-          iconName,
-          isIncome,
-          isExpense,
-        });
-      } else {
-        const categoryType = category;
-        boundedStore.addCategory({
-          categoryName,
-          iconName,
-          categoryType,
-        });
+      try {
+        boundedStore.setIsLoading();
+        const categoryName = values.category_name;
+        const iconName = values.icon_name;
+        const isIncome = item.is_income;
+        const isExpense = item.is_expense;
+        if (item) {
+          const categoryId = item.id;
+          boundedStore.editCategory({
+            categoryId,
+            categoryName,
+            iconName,
+            isIncome,
+            isExpense,
+          });
+        } else {
+          const categoryType = category;
+          boundedStore.addCategory({
+            categoryName,
+            iconName,
+            categoryType,
+          });
+        }
+        setShowModal(false);
+        
+        boundedStore.setOperationSuccess();
+      } catch (error) {
+        boundedStore.setOperationFailed();
       }
-      setShowModal(false);
     },
   });
   const { errors, touched } = formik;
@@ -53,9 +60,15 @@ function AddEditIncomeExpense({ setShowModal, item, category }) {
   };
 
   const handleDelete = () => {
-    const id = item.id;
-    boundedStore.deleteCategory({ id, category });
-    setShowModal(false);
+    try {
+      boundedStore.setIsLoading();
+      const id = item.id;
+      boundedStore.deleteCategory({ id, category });
+      setShowModal(false);
+      boundedStore.setOperationSuccess();
+    } catch (error) {
+      boundedStore.setOperationFailed();
+    }
   };
 
   const icons = {

@@ -1,7 +1,8 @@
 import React from "react";
+import LoadingScreen from "../components/loadingScreen/LoadingScreen";
 
 function loading() {
-  return <div>loading</div>;
+  return <LoadingScreen />;
 }
 
 export default loading;

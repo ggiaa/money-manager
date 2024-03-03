@@ -309,17 +309,14 @@ function budgeting() {
   };
 
   useEffect(() => {
-    boundedStore.getBudgets();
+    try {
+      boundedStore.setIsLoading();
+      boundedStore.getBudgets();
+      boundedStore.setOperationSuccess();
+    } catch (error) {
+      boundedStore.setOperationFailed();
+    }
   }, []);
-
-  // useEffect(() => {
-  //   if (budgets) {
-  //     console.log(budgets);
-  //     calculateBudget();
-  //   }
-  // }, [budgets]);
-
-  // budget option
 
   return (
     <div className="p-2 flex flex-col h-full">

@@ -3,12 +3,12 @@ import React from "react";
 import { NumericFormat } from "react-number-format";
 
 function Progress({ part, whole, budget }) {
-  const progress = (Number(part) / Number(whole)).toFixed(2) * 100;
+  const progress = Number((Number(part) / Number(whole)) * 100).toFixed(2);
   const progressWithPercent = progress + "%";
 
   console.log(progressWithPercent);
-  const overspend = Number(part) - Number(whole);
-  const remains = Number(whole) - Number(part);
+  const overspend = Number(Number(part) - Number(whole)).toFixed(2);
+  const remains = Number(Number(whole) - Number(part)).toFixed(2);
 
   return (
     <div>

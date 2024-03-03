@@ -319,10 +319,10 @@ function budgeting() {
   }, []);
 
   return (
-    <div className="p-2 flex flex-col h-full">
-      <div className="mb-3 flex justify-end relative">
-        <div className="absolute -z-10 flex flex-col items-center text-center left-0 w-full h-full">
-          <div className="my-auto text-2xl font-semibold">
+    <div className="p-2 flex flex-col h-full relative">
+      <div className="mb-3 flex justify-between absolute w-full left-0 top-0 ">
+        <div className="flex flex-col items-center text-center">
+          <div className="text-xl font-semibold">
             {moment().format("MMMM, YYYY")}
           </div>
         </div>
@@ -334,16 +334,16 @@ function budgeting() {
           Add Budget
         </button>
       </div>
-      <div className="h-full overflow-auto">
+      <div className="h-full overflow-auto my-auto w-3/4 mx-auto">
         {budgets.length ? (
-          <div className="overflow-auto flex flex-col w-2/3 gap-x-4 gap-y-8 mx-auto">
+          <div className="overflow-auto flex flex-col w-[95%] mt-2 gap-x-4 gap-y-10 mx-auto">
             {budgets.map((budget, i) => (
               <div
                 key={i}
                 onClick={() => handleEdit(budget)}
                 className="bg-white rounded-lg shadow-lg flex flex-col w-full"
               >
-                <div className="px-6 pt-4">
+                <div className="px-6 pt-4 mb-2">
                   <Progress
                     part={budget.spentAmount}
                     whole={budget.budget_amount}
@@ -353,7 +353,7 @@ function budgeting() {
                 {(Number(budget.spentAmount) > Number(budget.budget_amount) ||
                   Number(budget.dailyAverage) >
                     Number(budget.dailyRecomended)) && (
-                  <div className="flex text-sm items-center mx-4 px-2 py-2 my-2 text-red-600 border border-red-600">
+                  <div className="flex text-sm items-center rounded-md mx-4 px-2 py-2 myt-2 mb-3 text-red-600 border border-red-600">
                     <PiWarning className="text-lg mr-2" />
                     <p>
                       {Number(budget.spentAmount) > Number(budget.budget_amount)
@@ -370,7 +370,7 @@ function budgeting() {
                       top: "10%",
                       left: "12%",
                       right: "15%",
-                      bottom: "12%",
+                      bottom: "10%",
                     },
                     tooltip: {
                       trigger: "axis",
@@ -500,7 +500,7 @@ function budgeting() {
                     ],
                   }}
                 />
-                <div className="px-6 pb-4">
+                <div className="px-6 pb-4 mt-4">
                   <div className="flex justify-between">
                     <div>
                       <p className="text-sm">
@@ -532,9 +532,7 @@ function budgeting() {
             ))}
           </div>
         ) : (
-          <div className="flex justify-center items-center h-full text-lg text-slate-600">
-            There is no budget yet.
-          </div>
+          <></>
         )}
       </div>
 
